@@ -1,0 +1,599 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6AFA1E6D0B0EAB7B00CE7EAE /* iTunesAPI.c in Sources */ = {isa = PBXBuildFile; fileRef = 6AFA1E6A0B0EAB7B00CE7EAE /* iTunesAPI.c */; };
+		6AFA1E6E0B0EAB7B00CE7EAE /* iTunesAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AFA1E6B0B0EAB7B00CE7EAE /* iTunesAPI.h */; };
+		6AFA1E6F0B0EAB7B00CE7EAE /* iTunesVisualAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AFA1E6C0B0EAB7B00CE7EAE /* iTunesVisualAPI.h */; };
+		6AFBBD9F0B14F45D00D83937 /* hsbrgb.c in Sources */ = {isa = PBXBuildFile; fileRef = 6AFBBD9E0B14F45D00D83937 /* hsbrgb.c */; };
+		6AFBBDA70B14F52B00D83937 /* hsbrgb.h in Headers */ = {isa = PBXBuildFile; fileRef = 6AFBBDA60B14F52B00D83937 /* hsbrgb.h */; };
+		A6057171096496D000932F7D /* Fire.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = A605716B096496D000932F7D /* Fire.png */; };
+		A6057172096496D000932F7D /* Random.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = A605716C096496D000932F7D /* Random.png */; };
+		A6057173096496D000932F7D /* RedWhiteBlue.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = A605716D096496D000932F7D /* RedWhiteBlue.png */; };
+		A6057174096496D000932F7D /* Sea.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = A605716E096496D000932F7D /* Sea.png */; };
+		A6057175096496D000932F7D /* Snow.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = A605716F096496D000932F7D /* Snow.png */; };
+		A6057176096496D000932F7D /* Standard.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = A6057170096496D000932F7D /* Standard.png */; };
+		A64CD04106966D48002BBEAB /* FMGLMotion.h in Headers */ = {isa = PBXBuildFile; fileRef = A64CD03F06966D48002BBEAB /* FMGLMotion.h */; };
+		A64CD04206966D48002BBEAB /* FMGLMotion.c in Sources */ = {isa = PBXBuildFile; fileRef = A64CD04006966D48002BBEAB /* FMGLMotion.c */; };
+		A6658D620683E47D00EDF4B9 /* FountainMusic_Prefix.h in Headers */ = {isa = PBXBuildFile; fileRef = A6658D610683E47D00EDF4B9 /* FountainMusic_Prefix.h */; };
+		A6693C2E08F78EF3003CE65B /* FMDisplayItem.h in Headers */ = {isa = PBXBuildFile; fileRef = A6693C2C08F78EF3003CE65B /* FMDisplayItem.h */; };
+		A6693C2F08F78EF3003CE65B /* FMDisplayItem.c in Sources */ = {isa = PBXBuildFile; fileRef = A6693C2D08F78EF3003CE65B /* FMDisplayItem.c */; };
+		A67F8372054A39E600FC43D5 /* ParticleEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = A65AD0EC047F0BD400A80166 /* ParticleEngine.h */; };
+		A67F8373054A39E600FC43D5 /* Textures.h in Headers */ = {isa = PBXBuildFile; fileRef = A60CB0F30481312A00A80166 /* Textures.h */; };
+		A67F8374054A39E600FC43D5 /* Drawing.h in Headers */ = {isa = PBXBuildFile; fileRef = A60CB15104819FDF00A80166 /* Drawing.h */; };
+		A67F8375054A39E600FC43D5 /* FMDefs.h in Headers */ = {isa = PBXBuildFile; fileRef = A60CB1550481A01300A80166 /* FMDefs.h */; };
+		A67F8378054A39E600FC43D5 /* FountainModes.h in Headers */ = {isa = PBXBuildFile; fileRef = A610C16904DB676C0092C896 /* FountainModes.h */; };
+		A67F8379054A39E600FC43D5 /* FMList.h in Headers */ = {isa = PBXBuildFile; fileRef = A6B44B8504F1F61C00A80169 /* FMList.h */; };
+		A67F837D054A39E600FC43D5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
+		A67F8380054A39E600FC43D5 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 08FB77B2FE8417CDC02AAC07 /* main.c */; settings = {ATTRIBUTES = (); }; };
+		A67F8381054A39E600FC43D5 /* ParticleEngine.c in Sources */ = {isa = PBXBuildFile; fileRef = A65AD0ED047F0BD400A80166 /* ParticleEngine.c */; };
+		A67F8382054A39E600FC43D5 /* Drawing.c in Sources */ = {isa = PBXBuildFile; fileRef = A60CB15204819FDF00A80166 /* Drawing.c */; };
+		A67F8383054A39E600FC43D5 /* Textures.c in Sources */ = {isa = PBXBuildFile; fileRef = A60CB0F40481312A00A80166 /* Textures.c */; };
+		A67F8384054A39E600FC43D5 /* FMDefs.c in Sources */ = {isa = PBXBuildFile; fileRef = A65A1F130487EE4800A80166 /* FMDefs.c */; };
+		A67F8386054A39E600FC43D5 /* FountainModes.c in Sources */ = {isa = PBXBuildFile; fileRef = A610C16A04DB676C0092C896 /* FountainModes.c */; };
+		A67F8387054A39E600FC43D5 /* FMList.c in Sources */ = {isa = PBXBuildFile; fileRef = A6B44B8604F1F61C00A80169 /* FMList.c */; };
+		A67F838B054A39E600FC43D5 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */; };
+		A67F838C054A39E600FC43D5 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A643598604798F0E00A80166 /* AGL.framework */; };
+		A67F838E054A39E600FC43D5 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A60CB11D0481318800A80166 /* ApplicationServices.framework */; };
+		A67F838F054A39E600FC43D5 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A64359880479914A00A80166 /* OpenGL.framework */; };
+		A67F8392054A39E600FC43D5 /* PkgInfo in CopyFiles */ = {isa = PBXBuildFile; fileRef = A688C4E7047801FA00A80166 /* PkgInfo */; };
+		A696AC3406D6C71F00960D64 /* ColorIndex.plist in Resources */ = {isa = PBXBuildFile; fileRef = A696AC3006D6C70C00960D64 /* ColorIndex.plist */; };
+		A6DFF0BA05C4679B00AF1F3A /* Config.nib in Resources */ = {isa = PBXBuildFile; fileRef = A6DFF0B905C4679B00AF1F3A /* Config.nib */; };
+		A6DFF0CC05C468DC00AF1F3A /* FMConfigure.h in Headers */ = {isa = PBXBuildFile; fileRef = A6DFF0CA05C468DC00AF1F3A /* FMConfigure.h */; };
+		A6DFF0CD05C468DC00AF1F3A /* FMConfigure.c in Sources */ = {isa = PBXBuildFile; fileRef = A6DFF0CB05C468DC00AF1F3A /* FMConfigure.c */; };
+		A6F19CE105D57022009305D9 /* FMPrefs.h in Headers */ = {isa = PBXBuildFile; fileRef = A6F19CDF05D57022009305D9 /* FMPrefs.h */; };
+		A6F19CE205D57022009305D9 /* FMPrefs.c in Sources */ = {isa = PBXBuildFile; fileRef = A6F19CE005D57022009305D9 /* FMPrefs.c */; };
+		A6F9FF6708DBB00A00F7DED3 /* FMAudioProcessing.h in Headers */ = {isa = PBXBuildFile; fileRef = A6F9FF6508DBB00A00F7DED3 /* FMAudioProcessing.h */; };
+		A6F9FF6808DBB00A00F7DED3 /* FMAudioProcessing.c in Sources */ = {isa = PBXBuildFile; fileRef = A6F9FF6608DBB00A00F7DED3 /* FMAudioProcessing.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A64CCE5E068F8C3B002BBEAB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = ColorSchemes;
+			dstSubfolderSpec = 7;
+			files = (
+				A6057171096496D000932F7D /* Fire.png in CopyFiles */,
+				A6057172096496D000932F7D /* Random.png in CopyFiles */,
+				A6057173096496D000932F7D /* RedWhiteBlue.png in CopyFiles */,
+				A6057174096496D000932F7D /* Sea.png in CopyFiles */,
+				A6057175096496D000932F7D /* Snow.png in CopyFiles */,
+				A6057176096496D000932F7D /* Standard.png in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A67F8391054A39E600FC43D5 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents;
+			dstSubfolderSpec = 1;
+			files = (
+				A67F8392054A39E600FC43D5 /* PkgInfo in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		08FB77B2FE8417CDC02AAC07 /* main.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		6AFA1E6A0B0EAB7B00CE7EAE /* iTunesAPI.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = iTunesAPI.c; path = iTunesVisualAPI/iTunesAPI.c; sourceTree = "<group>"; };
+		6AFA1E6B0B0EAB7B00CE7EAE /* iTunesAPI.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = iTunesAPI.h; path = iTunesVisualAPI/iTunesAPI.h; sourceTree = "<group>"; };
+		6AFA1E6C0B0EAB7B00CE7EAE /* iTunesVisualAPI.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = iTunesVisualAPI.h; path = iTunesVisualAPI/iTunesVisualAPI.h; sourceTree = "<group>"; };
+		6AFBBD9E0B14F45D00D83937 /* hsbrgb.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = hsbrgb.c; sourceTree = "<group>"; };
+		6AFBBDA60B14F52B00D83937 /* hsbrgb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hsbrgb.h; sourceTree = "<group>"; };
+		A605716B096496D000932F7D /* Fire.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Fire.png; path = colorschemes/Fire.png; sourceTree = "<group>"; };
+		A605716C096496D000932F7D /* Random.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Random.png; path = colorschemes/Random.png; sourceTree = "<group>"; };
+		A605716D096496D000932F7D /* RedWhiteBlue.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = RedWhiteBlue.png; path = colorschemes/RedWhiteBlue.png; sourceTree = "<group>"; };
+		A605716E096496D000932F7D /* Sea.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Sea.png; path = colorschemes/Sea.png; sourceTree = "<group>"; };
+		A605716F096496D000932F7D /* Snow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Snow.png; path = colorschemes/Snow.png; sourceTree = "<group>"; };
+		A6057170096496D000932F7D /* Standard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Standard.png; path = colorschemes/Standard.png; sourceTree = "<group>"; };
+		A60CB0F30481312A00A80166 /* Textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Textures.h; sourceTree = "<group>"; };
+		A60CB0F40481312A00A80166 /* Textures.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Textures.c; sourceTree = "<group>"; };
+		A60CB11D0481318800A80166 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
+		A60CB15104819FDF00A80166 /* Drawing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Drawing.h; sourceTree = "<group>"; };
+		A60CB15204819FDF00A80166 /* Drawing.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Drawing.c; sourceTree = "<group>"; };
+		A60CB1550481A01300A80166 /* FMDefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDefs.h; sourceTree = "<group>"; };
+		A610C16904DB676C0092C896 /* FountainModes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FountainModes.h; sourceTree = "<group>"; };
+		A610C16A04DB676C0092C896 /* FountainModes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FountainModes.c; sourceTree = "<group>"; };
+		A643598604798F0E00A80166 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
+		A64359880479914A00A80166 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
+		A64CD03F06966D48002BBEAB /* FMGLMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMGLMotion.h; sourceTree = "<group>"; };
+		A64CD04006966D48002BBEAB /* FMGLMotion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FMGLMotion.c; sourceTree = "<group>"; };
+		A65A1F130487EE4800A80166 /* FMDefs.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FMDefs.c; sourceTree = "<group>"; };
+		A65AD0EC047F0BD400A80166 /* ParticleEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParticleEngine.h; sourceTree = "<group>"; };
+		A65AD0ED047F0BD400A80166 /* ParticleEngine.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ParticleEngine.c; sourceTree = "<group>"; };
+		A6658D610683E47D00EDF4B9 /* FountainMusic_Prefix.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FountainMusic_Prefix.h; sourceTree = "<group>"; };
+		A6693C2C08F78EF3003CE65B /* FMDisplayItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDisplayItem.h; sourceTree = "<group>"; };
+		A6693C2D08F78EF3003CE65B /* FMDisplayItem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FMDisplayItem.c; sourceTree = "<group>"; };
+		A67F8395054A39E600FC43D5 /* Info-FountainMusic.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-FountainMusic.plist"; sourceTree = "<group>"; };
+		A67F8396054A39E600FC43D5 /* Fountain Music.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Fountain Music.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A688C4BF0478011E00A80166 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
+		A688C4E7047801FA00A80166 /* PkgInfo */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = PkgInfo; sourceTree = "<group>"; };
+		A696AC3006D6C70C00960D64 /* ColorIndex.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = ColorIndex.plist; sourceTree = "<group>"; };
+		A6B44B8504F1F61C00A80169 /* FMList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMList.h; sourceTree = "<group>"; };
+		A6B44B8604F1F61C00A80169 /* FMList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FMList.c; sourceTree = "<group>"; };
+		A6DFF0B905C4679B00AF1F3A /* Config.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = Config.nib; sourceTree = "<group>"; };
+		A6DFF0CA05C468DC00AF1F3A /* FMConfigure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMConfigure.h; sourceTree = "<group>"; };
+		A6DFF0CB05C468DC00AF1F3A /* FMConfigure.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FMConfigure.c; sourceTree = "<group>"; };
+		A6F19CDF05D57022009305D9 /* FMPrefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMPrefs.h; sourceTree = "<group>"; };
+		A6F19CE005D57022009305D9 /* FMPrefs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FMPrefs.c; sourceTree = "<group>"; };
+		A6F9FF6508DBB00A00F7DED3 /* FMAudioProcessing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMAudioProcessing.h; sourceTree = "<group>"; };
+		A6F9FF6608DBB00A00F7DED3 /* FMAudioProcessing.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FMAudioProcessing.c; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A67F838A054A39E600FC43D5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A67F838B054A39E600FC43D5 /* Carbon.framework in Frameworks */,
+				A67F838C054A39E600FC43D5 /* AGL.framework in Frameworks */,
+				A67F838E054A39E600FC43D5 /* ApplicationServices.framework in Frameworks */,
+				A67F838F054A39E600FC43D5 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		089C166AFE841209C02AAC07 /* FountainMusic */ = {
+			isa = PBXGroup;
+			children = (
+				08FB77ADFE841716C02AAC07 /* Source */,
+				089C167CFE841241C02AAC07 /* Resources */,
+				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
+				19C28FB4FE9D528D11CA2CBB /* Products */,
+				A67F8395054A39E600FC43D5 /* Info-FountainMusic.plist */,
+			);
+			name = FountainMusic;
+			sourceTree = "<group>";
+		};
+		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */,
+				A643598604798F0E00A80166 /* AGL.framework */,
+				A64359880479914A00A80166 /* OpenGL.framework */,
+				A688C4BF0478011E00A80166 /* CoreFoundation.framework */,
+				A60CB11D0481318800A80166 /* ApplicationServices.framework */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		089C167CFE841241C02AAC07 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A696AC3006D6C70C00960D64 /* ColorIndex.plist */,
+				A64CCDAD068F8695002BBEAB /* Color Schemes */,
+				A6DFF0B905C4679B00AF1F3A /* Config.nib */,
+				089C167DFE841241C02AAC07 /* InfoPlist.strings */,
+				A688C4E7047801FA00A80166 /* PkgInfo */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		08FB77ADFE841716C02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				A67D5FE10682158E00DE660E /* Main Code */,
+				A67D5F840682150400DE660E /* Drawing */,
+				A67D5FB40682154900DE660E /* Particle-ness */,
+				A67D5FA00682152C00DE660E /* Preferences */,
+				A67D5FC10682156500DE660E /* Data Structures */,
+				A67D5FBC0682155A00DE660E /* iTunes API */,
+				A6658D610683E47D00EDF4B9 /* FountainMusic_Prefix.h */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		19C28FB4FE9D528D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A67F8396054A39E600FC43D5 /* Fountain Music.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A64CCDAD068F8695002BBEAB /* Color Schemes */ = {
+			isa = PBXGroup;
+			children = (
+				A605716B096496D000932F7D /* Fire.png */,
+				A605716C096496D000932F7D /* Random.png */,
+				A605716D096496D000932F7D /* RedWhiteBlue.png */,
+				A605716E096496D000932F7D /* Sea.png */,
+				A605716F096496D000932F7D /* Snow.png */,
+				A6057170096496D000932F7D /* Standard.png */,
+			);
+			name = "Color Schemes";
+			sourceTree = "<group>";
+		};
+		A67D5F840682150400DE660E /* Drawing */ = {
+			isa = PBXGroup;
+			children = (
+				6AFBBDA60B14F52B00D83937 /* hsbrgb.h */,
+				6AFBBD9E0B14F45D00D83937 /* hsbrgb.c */,
+				A60CB15104819FDF00A80166 /* Drawing.h */,
+				A60CB15204819FDF00A80166 /* Drawing.c */,
+				A60CB0F30481312A00A80166 /* Textures.h */,
+				A60CB0F40481312A00A80166 /* Textures.c */,
+				A64CD03F06966D48002BBEAB /* FMGLMotion.h */,
+				A64CD04006966D48002BBEAB /* FMGLMotion.c */,
+				A6693C2C08F78EF3003CE65B /* FMDisplayItem.h */,
+				A6693C2D08F78EF3003CE65B /* FMDisplayItem.c */,
+			);
+			name = Drawing;
+			sourceTree = "<group>";
+		};
+		A67D5FA00682152C00DE660E /* Preferences */ = {
+			isa = PBXGroup;
+			children = (
+				A6DFF0CA05C468DC00AF1F3A /* FMConfigure.h */,
+				A6DFF0CB05C468DC00AF1F3A /* FMConfigure.c */,
+				A6F19CDF05D57022009305D9 /* FMPrefs.h */,
+				A6F19CE005D57022009305D9 /* FMPrefs.c */,
+			);
+			name = Preferences;
+			sourceTree = "<group>";
+		};
+		A67D5FB40682154900DE660E /* Particle-ness */ = {
+			isa = PBXGroup;
+			children = (
+				A65AD0EC047F0BD400A80166 /* ParticleEngine.h */,
+				A65AD0ED047F0BD400A80166 /* ParticleEngine.c */,
+				A610C16904DB676C0092C896 /* FountainModes.h */,
+				A610C16A04DB676C0092C896 /* FountainModes.c */,
+			);
+			name = "Particle-ness";
+			sourceTree = "<group>";
+		};
+		A67D5FBC0682155A00DE660E /* iTunes API */ = {
+			isa = PBXGroup;
+			children = (
+				6AFA1E6A0B0EAB7B00CE7EAE /* iTunesAPI.c */,
+				6AFA1E6B0B0EAB7B00CE7EAE /* iTunesAPI.h */,
+				6AFA1E6C0B0EAB7B00CE7EAE /* iTunesVisualAPI.h */,
+			);
+			name = "iTunes API";
+			sourceTree = "<group>";
+		};
+		A67D5FC10682156500DE660E /* Data Structures */ = {
+			isa = PBXGroup;
+			children = (
+				A6B44B8504F1F61C00A80169 /* FMList.h */,
+				A6B44B8604F1F61C00A80169 /* FMList.c */,
+			);
+			name = "Data Structures";
+			sourceTree = "<group>";
+		};
+		A67D5FE10682158E00DE660E /* Main Code */ = {
+			isa = PBXGroup;
+			children = (
+				08FB77B2FE8417CDC02AAC07 /* main.c */,
+				A60CB1550481A01300A80166 /* FMDefs.h */,
+				A65A1F130487EE4800A80166 /* FMDefs.c */,
+				A6F9FF6508DBB00A00F7DED3 /* FMAudioProcessing.h */,
+				A6F9FF6608DBB00A00F7DED3 /* FMAudioProcessing.c */,
+			);
+			name = "Main Code";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		A67F8370054A39E600FC43D5 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A67F8372054A39E600FC43D5 /* ParticleEngine.h in Headers */,
+				A67F8373054A39E600FC43D5 /* Textures.h in Headers */,
+				A67F8374054A39E600FC43D5 /* Drawing.h in Headers */,
+				A67F8375054A39E600FC43D5 /* FMDefs.h in Headers */,
+				A67F8378054A39E600FC43D5 /* FountainModes.h in Headers */,
+				A67F8379054A39E600FC43D5 /* FMList.h in Headers */,
+				A6DFF0CC05C468DC00AF1F3A /* FMConfigure.h in Headers */,
+				A6F19CE105D57022009305D9 /* FMPrefs.h in Headers */,
+				A6658D620683E47D00EDF4B9 /* FountainMusic_Prefix.h in Headers */,
+				A64CD04106966D48002BBEAB /* FMGLMotion.h in Headers */,
+				A6F9FF6708DBB00A00F7DED3 /* FMAudioProcessing.h in Headers */,
+				A6693C2E08F78EF3003CE65B /* FMDisplayItem.h in Headers */,
+				6AFA1E6E0B0EAB7B00CE7EAE /* iTunesAPI.h in Headers */,
+				6AFA1E6F0B0EAB7B00CE7EAE /* iTunesVisualAPI.h in Headers */,
+				6AFBBDA70B14F52B00D83937 /* hsbrgb.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		A67F836F054A39E600FC43D5 /* FountainMusic */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A6E9801508D50277009E81F1 /* Build configuration list for PBXNativeTarget "FountainMusic" */;
+			buildPhases = (
+				A67F8370054A39E600FC43D5 /* Headers */,
+				A67F837C054A39E600FC43D5 /* Resources */,
+				A67F837F054A39E600FC43D5 /* Sources */,
+				A67F838A054A39E600FC43D5 /* Frameworks */,
+				A67F8391054A39E600FC43D5 /* CopyFiles */,
+				A64CCE5E068F8C3B002BBEAB /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FountainMusic;
+			productInstallPath = "$(HOME)/Library/Bundles";
+			productName = BriPlugin;
+			productReference = A67F8396054A39E600FC43D5 /* Fountain Music.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		089C1669FE841209C02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = A6E9801908D50277009E81F1 /* Build configuration list for PBXProject "FountainMusic" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			mainGroup = 089C166AFE841209C02AAC07 /* FountainMusic */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A67F836F054A39E600FC43D5 /* FountainMusic */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A67F837C054A39E600FC43D5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A696AC3406D6C71F00960D64 /* ColorIndex.plist in Resources */,
+				A67F837D054A39E600FC43D5 /* InfoPlist.strings in Resources */,
+				A6DFF0BA05C4679B00AF1F3A /* Config.nib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A67F837F054A39E600FC43D5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A67F8380054A39E600FC43D5 /* main.c in Sources */,
+				A67F8381054A39E600FC43D5 /* ParticleEngine.c in Sources */,
+				A67F8382054A39E600FC43D5 /* Drawing.c in Sources */,
+				A67F8383054A39E600FC43D5 /* Textures.c in Sources */,
+				A67F8384054A39E600FC43D5 /* FMDefs.c in Sources */,
+				A67F8386054A39E600FC43D5 /* FountainModes.c in Sources */,
+				A67F8387054A39E600FC43D5 /* FMList.c in Sources */,
+				A6DFF0CD05C468DC00AF1F3A /* FMConfigure.c in Sources */,
+				A6F19CE205D57022009305D9 /* FMPrefs.c in Sources */,
+				A64CD04206966D48002BBEAB /* FMGLMotion.c in Sources */,
+				A6F9FF6808DBB00A00F7DED3 /* FMAudioProcessing.c in Sources */,
+				A6693C2F08F78EF3003CE65B /* FMDisplayItem.c in Sources */,
+				6AFA1E6D0B0EAB7B00CE7EAE /* iTunesAPI.c in Sources */,
+				6AFBBD9F0B14F45D00D83937 /* hsbrgb.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		089C167DFE841241C02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C167EFE841241C02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		A6458C7A0982D1D1006D732F /* Release (Universal) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				CURRENT_PROJECT_VERSION = 314;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = FountainMusic_Prefix.h;
+				GCC_PREPROCESSOR_DEFINITIONS = TARGET_OS_MAC;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "Info-FountainMusic.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "Fountain Music";
+				SDKROOT = "";
+				SECTORDER_FLAGS = "";
+				VERSIONING_SYSTEM = "apple-generic";
+				WARNING_CFLAGS = "-Wmost";
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = NO;
+			};
+			name = "Release (Universal)";
+		};
+		A6458C7B0982D1D1006D732F /* Release (Universal) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_INPUT_FILETYPE = automatic;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release (Universal)";
+		};
+		A6E9801608D50277009E81F1 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 314;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = FountainMusic_Prefix.h;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "Info-FountainMusic.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = "-falign-loops=16";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "Fountain Music";
+				SDKROOT = "";
+				SECTORDER_FLAGS = "";
+				VERSIONING_SYSTEM = "apple-generic";
+				WARNING_CFLAGS = "-Wmost";
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = YES;
+			};
+			name = Development;
+		};
+		A6E9801708D50277009E81F1 /* Release (PPC) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = ppc;
+				COPY_PHASE_STRIP = YES;
+				CURRENT_PROJECT_VERSION = 314;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = FountainMusic_Prefix.h;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "Info-FountainMusic.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "Fountain Music";
+				SDKROOT = "";
+				SECTORDER_FLAGS = "";
+				VERSIONING_SYSTEM = "apple-generic";
+				WARNING_CFLAGS = "-Wmost";
+				WRAPPER_EXTENSION = bundle;
+				ZERO_LINK = NO;
+			};
+			name = "Release (PPC)";
+		};
+		A6E9801808D50277009E81F1 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 314;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = FountainMusic_Prefix.h;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "Info-FountainMusic.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "Fountain Music";
+				SDKROOT = "";
+				SECTORDER_FLAGS = "";
+				VERSIONING_SYSTEM = "apple-generic";
+				WARNING_CFLAGS = "-Wmost";
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Default;
+		};
+		A6E9801A08D50277009E81F1 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_INPUT_FILETYPE = automatic;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Development;
+		};
+		A6E9801B08D50277009E81F1 /* Release (PPC) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_INPUT_FILETYPE = automatic;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release (PPC)";
+		};
+		A6E9801C08D50277009E81F1 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_INPUT_FILETYPE = automatic;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Default;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A6E9801508D50277009E81F1 /* Build configuration list for PBXNativeTarget "FountainMusic" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6E9801608D50277009E81F1 /* Development */,
+				A6E9801708D50277009E81F1 /* Release (PPC) */,
+				A6458C7A0982D1D1006D732F /* Release (Universal) */,
+				A6E9801808D50277009E81F1 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		A6E9801908D50277009E81F1 /* Build configuration list for PBXProject "FountainMusic" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6E9801A08D50277009E81F1 /* Development */,
+				A6E9801B08D50277009E81F1 /* Release (PPC) */,
+				A6458C7B0982D1D1006D732F /* Release (Universal) */,
+				A6E9801C08D50277009E81F1 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 089C1669FE841209C02AAC07 /* Project object */;
+}

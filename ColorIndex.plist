@@ -1,0 +1,74 @@
+<!--
+    Copyright 2005, 2006 Brian Moore
+
+    This file is part of Fountain Music.
+
+    Fountain Music is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    Fountain Music is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Fountain Music; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>Filename</key>
+		<string>Standard.png</string>
+		<key>Name</key>
+		<string>Classic</string>
+		<key>Speed</key>
+		<real>3.0</real>
+	</dict>
+
+	<dict>
+		<key>Filename</key>
+		<string>RedWhiteBlue.png</string>
+		<key>Name</key>
+		<string>Red, White and Blue</string>
+	</dict>
+		
+	<dict>
+		<key>Filename</key>
+		<string>Fire.png</string>
+		<key>Name</key>
+		<string>Fire</string>
+	</dict>
+	
+
+	<dict>
+		<key>Name</key>
+		<string>Random</string>
+		<key>Filename</key>
+		<string>Random.png</string>
+		<key>Speed</key>
+		<real>3.0</real>
+	</dict>
+	
+	<dict>
+		<key>Filename</key>
+		<string>Sea.png</string>
+		<key>Name</key>
+		<string>Sea</string>
+	</dict>
+	
+	<dict>
+		<key>Filename</key>
+		<string>Snow.png</string>
+		<key>Name</key>
+		<string>Snow</string>
+	</dict>
+	
+</array>
+</plist>
+
