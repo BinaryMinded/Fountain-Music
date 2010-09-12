@@ -87,7 +87,7 @@ void InitMyDataValues(VisualPluginData *myData)
 	myData->births = 0;
 	myData->deaths = 0;
 	
-    
+    myData->renderTimer = NULL;
     
 	InitDisplayItems(myData);
 	
@@ -128,7 +128,7 @@ inline void FMSwapBuffers(VisualPluginData *myData)
 {                
     if (myData->glContext != NULL) aglSwapBuffers(myData->glContext);
 }
-
+	
 #pragma mark -
 #pragma mark Utility Functions
 

@@ -32,6 +32,13 @@ OSStatus VPHandleRenderMessage(VisualPluginRenderMessage *renderMessage, VisualP
 OSStatus VPHandleEventMessage(VisualPluginEventMessage *eventMessage, VisualPluginData *myData);
 OSStatus VPHandleShowWindowMessage(VisualPluginShowWindowMessage *showWindowMessage, VisualPluginData *myData);
 
+void FMProcessAudioData(VisualPluginRenderMessage *renderMessage, VisualPluginData *myData);
+void FMStepAnimations(VisualPluginData *myData);
+void FMRender(VisualPluginData *myData);
+
+void StartRenderTimer(VisualPluginData *myData);
+void StopRenderTimer(VisualPluginData *myData);
+
 Boolean PixelFormatAccelerated(AGLPixelFormat fmt);
 
 static OSStatus VisualPluginHandler(OSType message, VisualPluginMessageInfo *messageInfo,void *refCon)
@@ -108,6 +115,9 @@ static OSStatus VisualPluginHandler(OSType message, VisualPluginMessageInfo *mes
 			myData->motionBuffer = FALSE;
 			#endif
 			
+			// invalidate render timer
+			StopRenderTimer(myData);
+			
             break;
             
         #pragma mark kVisualPluginRenderMessage
@@ -119,28 +129,7 @@ static OSStatus VisualPluginHandler(OSType message, VisualPluginMessageInfo *mes
         
         #pragma mark kVisualPluginIdleMessage
         case kVisualPluginIdleMessage:
-        
-            if (myData->isActivated && !myData->isPlaying)
-            {
-				// compute time step
-				float stepTime = CURR_TIME-myData->lastStepTime;
-			
-				// spin the display
-                #ifndef NO_SPIN
-                myData->angle -= stepTime*20.0;
-                myData->angle = ClampAngle(myData->angle); // (keep it within 0..2π) 
-                #endif
-				
-				// fade screen items
-				StepDisplayItems(myData, stepTime);
-                
-				// update last step time
-				myData->lastStepTime = CURR_TIME;
-				
-				// draw it up!
-                RenderScene(myData);
-                FMSwapBuffers(myData);
-            }
+			// Nothing to do. Idle messages are silly anyway, don't use them.
             break;
 			
 			
@@ -423,131 +412,145 @@ OSStatus VPHandleShowWindowMessage(VisualPluginShowWindowMessage *showWindowMess
 
 	ShowTrackInfo(myData, myData->alwaysShowTrackInfo); // a bit of higher level scripting
 	
+	// finally, set up a CFRunLoop timer for rendering
+	StartRenderTimer(myData);
+	
 	return status;
+}
+
+void FMProcessRenderData(VisualPluginData *myData, RenderVisualData *renderData) {
+#pragma mark -- Averaging Stuff
+	
+	// add now sample data to buffers
+	FMAudioBufferInsertITSample(myData->minuteBuffer, renderData->spectrumData);
+	FMAudioBufferInsertITSample(myData->shortBuffer, renderData->spectrumData);
+	
+	// compute the averages
+	FMAudioBufferComputeAverage(myData->minuteBuffer);
+	FMAudioBufferComputeAverage(myData->shortBuffer);	
+	
+	// compute a delta
+	FMAudioSubtractSpectrumData(FMAudioBufferGetAverage(myData->shortBuffer),
+								FMAudioBufferGetAverage(myData->minuteBuffer), 
+								&myData->relativePercent);
+	
+	Particle3D *particle;
+	float numNewParticlesF;
+	int numNewParticlesI;
+	int j, chanNum;
+	
+	// just a bit of bookkeeping, this may be out of place
+	myData->births = 0;
+	myData->deaths = 0;
+	
+	int i;
+	// particle creation loop, for every meaningful sample in our processed data
+	for (i=0; i<kFMNumSpectrumEntries; i++)
+	{
+		chanNum = rand()%2;
+		
+		// determine the exact number of new particles to create
+		// make float value, using remainder from last time
+		numNewParticlesF = (myData->relativePercent[chanNum][i] > 0.007) * 1.00 +
+		myData->particleNumRemainder;
+		
+		// store remainder from this time
+		myData->particleNumRemainder = numNewParticlesF - floorf(numNewParticlesF);
+		
+		// round down to integer
+		numNewParticlesI = (int)floorf(numNewParticlesF);
+		
+		// create the new particles
+		for (j=0; j<numNewParticlesI; j++)
+		{
+			// get a free particle
+			particle = GetParticle(myData->supply);
+			
+			if (particle) // we may have run out of particles
+			{
+				myData->births++; // bookkeeping
+				
+				// time to die is constant now, only a precaution against immortal particles
+				particle->timeToDie = 10.0;
+				
+				// this call sets the location, velocity, acceleration, etc of 
+				// the particle given it's representative frequency/amplitude
+				FMFountainModeSetupParticle(myData->modeData, particle, i/255.0f, myData->relativePercent[chanNum][i], chanNum);
+				
+				particle->accel.y = myData->currGravity;
+				
+				// set its color according to the current color table
+				particle->color.r = ColorTableComponentValue(myData, i/255.0, 0)
+				*myData->relativePercent[chanNum][i]*3.0;
+				
+				particle->color.g = ColorTableComponentValue(myData, i/255.0, 1)
+				*myData->relativePercent[chanNum][i]*3.0;
+				
+				particle->color.b = ColorTableComponentValue(myData, i/255.0, 2)
+				*myData->relativePercent[chanNum][i]*3.0;
+			}
+			//else DEBUG_OUT("out of particles!\n");
+		}                
+	}
+	
+#ifdef DEBUG_HISTORY
+	myData->particleHistory[myData->historyHeadIdx] = myData->births;
+	myData->historyHeadIdx = (myData->historyHeadIdx+1)%HISTORY_LENGTH;
+#endif
+	
+}
+
+void FMStepAnimations(VisualPluginData *myData) {
+	// compute time step for integration
+	float stepTime = CURR_TIME-(myData->lastStepTime);
+	
+	if (myData->isPlaying) {
+		// step the mode's animation
+		FMFountainModeStepAnimation(myData->modeData, stepTime);
+		
+		// step along the color table in time
+		myData->currTableColumn += stepTime*myData->currTableSpeed;
+		
+		// clamp the color table to a safe range
+		while ( (int)myData->currTableColumn >= myData->tableWidth ) myData->currTableColumn -= myData->tableWidth;
+		
+		// move every particle
+		StepSupply(myData->supply, stepTime);
+		
+		// reset particles out of bounds
+		myData->deaths = HandleSupplyOB(myData->supply);
+		UpdateParticleDisplayItem(myData);
+	}
+	
+	// rotate display
+#ifndef NO_SPIN
+	myData->angle -= stepTime*20.0;
+	myData->angle = ClampAngle(myData->angle); // (keep it within 0..2pi) 
+#endif
+	
+	// fade screen items out
+	StepDisplayItems(myData, stepTime);
+	
+	// set the new render time
+	myData->lastStepTime = CURR_TIME;
+}
+
+void FMRender(VisualPluginData *myData) {
+	aglSetCurrentContext(myData->glContext);
+	
+	RenderScene(myData);
+	FMSwapBuffers(myData);
 }
 
 OSStatus VPHandleRenderMessage(VisualPluginRenderMessage *renderMessage, VisualPluginData *myData)
 {
 	OSStatus status = noErr;
-	if (myData->isActivated && myData->isPlaying)
+	if (myData->isActivated)
     {
-        #pragma mark -- Averaging Stuff
+		// just process the data, don't even render (that's the render timer's responsibility)
+        FMProcessRenderData(myData, renderMessage->renderData);
+	}
 	
-		// add now sample data to buffers
-        FMAudioBufferInsertITSample(myData->minuteBuffer, renderMessage->renderData->spectrumData);
-        FMAudioBufferInsertITSample(myData->shortBuffer, renderMessage->renderData->spectrumData);
-        
-		// compute the averages
-        FMAudioBufferComputeAverage(myData->minuteBuffer);
-        FMAudioBufferComputeAverage(myData->shortBuffer);
-        
-        #pragma mark -- Particle setting
-        // computer time step for integration
-        float stepTime = CURR_TIME-(myData->lastStepTime);
-        
-        // step the mode's animation
-        FMFountainModeStepAnimation(myData->modeData, stepTime);
-
-        Particle3D *particle;
-        float numNewParticlesF;
-        int numNewParticlesI;
-        int j, chanNum;
-        
-        FMAudioSubtractSpectrumData(FMAudioBufferGetAverage(myData->shortBuffer),
-									FMAudioBufferGetAverage(myData->minuteBuffer), 
-									&myData->relativePercent);
-		
-		
-		// just a bit of bookkeeping, this may be out of place
-        myData->births = 0;
-		myData->deaths = 0;
-		
-        // step along the color table in time
-        myData->currTableColumn += stepTime*myData->currTableSpeed;
-		
-		// clamp the color table to a safe range
-		while ( (int)myData->currTableColumn >= myData->tableWidth ) myData->currTableColumn -= myData->tableWidth;
-		
-		int i;
-        // particle creation loop, for every meaningful sample in our processed data
-        for (i=0; i<kFMNumSpectrumEntries; i++)
-        {
-            chanNum = rand()%2;
-            
-            // determine the exact number of new particles to create
-            // make float value, using remainder from last time
-            numNewParticlesF = (myData->relativePercent[chanNum][i] > 0.007) * 1.00 +
-                                myData->particleNumRemainder;
-			
-            // store remainder from this time
-            myData->particleNumRemainder = numNewParticlesF - floorf(numNewParticlesF);
-            
-            // round down to integer
-            numNewParticlesI = (int)floorf(numNewParticlesF);
-            
-            // create the new particles
-            for (j=0; j<numNewParticlesI; j++)
-            {
-                // get a free particle
-                particle = GetParticle(myData->supply);
-                
-                if (particle) // we may have run out of particles
-                {
-					myData->births++; // bookkeeping
-					
-					// time to die is constant now, only a precaution against immortal particles
-					particle->timeToDie = 10.0;
-                    
-					// this call sets the location, velocity, acceleration, etc of 
-					// the particle given it's representative frequency/amplitude
-                    FMFountainModeSetupParticle(myData->modeData, particle, i/255.0f, myData->relativePercent[chanNum][i], chanNum);
-					
-					particle->accel.y = myData->currGravity;
-                    
-                    // set its color according to the current color table
-                    particle->color.r = ColorTableComponentValue(myData, i/255.0, 0)
-															*myData->relativePercent[chanNum][i]*3.0;
-                                                            
-                    particle->color.g = ColorTableComponentValue(myData, i/255.0, 1)
-															*myData->relativePercent[chanNum][i]*3.0;
-                                                            
-                    particle->color.b = ColorTableComponentValue(myData, i/255.0, 2)
-                                                            *myData->relativePercent[chanNum][i]*3.0;
-                }
-                //else DEBUG_OUT("out of particles!\n");
-            }                
-        }
-        
-        
-        #pragma mark -- Particle Move/Check
-		
-		// move every particle
-        StepSupply(myData->supply, stepTime);
-		
-		// rotate display
-		myData->angle -= 20.0*stepTime;
-		
-		// fade screen items out
-		StepDisplayItems(myData, stepTime);
-        
-        // set the new render time
-        myData->lastStepTime = CURR_TIME;
-        
-        // reset particles out of bounds
-        myData->deaths = HandleSupplyOB(myData->supply);
-		UpdateParticleDisplayItem(myData);
-        
-		#ifdef DEBUG_HISTORY
-		myData->particleHistory[myData->historyHeadIdx] = myData->births;
-		myData->historyHeadIdx = (myData->historyHeadIdx+1)%HISTORY_LENGTH;
-		#endif
-        
-        aglSetCurrentContext(myData->glContext);
-		
-        RenderScene(myData);
-        FMSwapBuffers(myData);
-    }
-
 	return status;
 }
 
@@ -714,4 +717,37 @@ Boolean PixelFormatAccelerated(AGLPixelFormat fmt)
 	
 	return flag == GL_TRUE;
 }
+
+#pragma mark -
+#pragma mark Render Timer
+void RenderTimerFired(CFRunLoopTimerRef timer, void *info) {
+	VisualPluginData *myData = info;
+	
+	if (myData->isActivated)
+	{
+		FMStepAnimations(myData);
+		FMRender(myData);
+	}
+	
+}
+
+void StartRenderTimer(VisualPluginData *myData) {
+	CFRunLoopTimerContext context = {0, myData, NULL, NULL, NULL};	
+	CFRunLoopTimerRef newTimer = CFRunLoopTimerCreate(kCFAllocatorDefault, 0, 1.0/60.0, 0, 0, RenderTimerFired, &context);
+	
+	myData->renderTimer = newTimer;
+	
+	CFRunLoopAddTimer(CFRunLoopGetCurrent(), newTimer, kCFRunLoopCommonModes);
+	
+}
+
+void StopRenderTimer(VisualPluginData *myData) {
+	
+	if (myData->renderTimer) {
+		CFRunLoopTimerInvalidate(myData->renderTimer);
+		CFRelease(myData->renderTimer);
+		myData->renderTimer = NULL;
+	}
+}
+
 

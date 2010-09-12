@@ -104,6 +104,8 @@ typedef struct VisualPluginData {
 	Rect				destRect;
 	OptionBits			destOptions;
     
+	// render timer
+	CFRunLoopTimerRef renderTimer;
 	
 	// OpenGL stuff
 	AGLContext glContext;
@@ -214,6 +216,7 @@ void InitMyDataValues(VisualPluginData *myData);
 //void CleanupActiveMyDataValues(VisualPluginData *myData);
 void InitializeTextures();
 inline void FMSwapBuffers(VisualPluginData *myData);
+
 
 // utility methods
 double CurrDoubleTime();

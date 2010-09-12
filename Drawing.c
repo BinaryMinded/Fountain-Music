@@ -197,7 +197,7 @@ void InitDisplayItems(VisualPluginData *myData)
 	FMDisplayItemSetTextSize(myData->namedItems.titleDispItem, 13.0);
 	FMDisplayItemSetTextSize(myData->namedItems.artistDispItem, 13.0);
 	FMDisplayItemSetTextSize(myData->namedItems.albumDispItem, 13.0);
-	FMDisplayItemSetTextSize(myData->namedItems.versDispItem, 9.0);
+	FMDisplayItemSetTextSize(myData->namedItems.versDispItem, 12.0);
 		
 	// layout items:
 	LayoutDisplayItems(myData);

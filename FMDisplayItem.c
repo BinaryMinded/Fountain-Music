@@ -92,34 +92,23 @@ FMDisplayItemRef FMDisplayItemCreate()
 	newItem->textureDirty = TRUE;
 	
 	// setup style
-	newItem->textSize = 11.0; // default
+	newItem->textSize = 12.0; // default
 	CFMutableDictionaryRef style;
 	style = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 
 	// white text
 	CFDictionarySetValue(style, kCTForegroundColorAttributeName, CGColorGetConstantColor(kCGColorWhite));
 	
+	// outlined with black
+	CGFloat strokeWidthF = -1.5;
+	CFNumberRef strokeWidth = CFNumberCreate(kCFAllocatorDefault, kCFNumberCGFloatType, &strokeWidthF);
+	CFDictionarySetValue(style, kCTStrokeWidthAttributeName, strokeWidth);
+	CFRelease(strokeWidth);
+	
+	CFDictionarySetValue(style, kCTStrokeColorAttributeName, CGColorGetConstantColor(kCGColorBlack));
+	
 	// system UI size N font
 	FMSetStyleTextSize(style, newItem->textSize);
-	
-	//ATSUAttributeTag styleAttrTags[] = {kATSUSizeTag, kATSURGBAlphaColorTag, kATSUQDBoldfaceTag};
-//	ByteCount styleAttrSizes[] = {sizeof(Fixed), sizeof(ATSURGBAlphaColor), sizeof(Boolean)};
-	//Boolean trueBoolean = TRUE;
-	//Boolean falseBoolean = FALSE;
-	/*static boolean_t specificFontSet = FALSE;
-	static ATSUFontID specificFont;
-	
-	if (specificFontSet == FALSE) 
-	{
-		specificFont = FMSpecificFontID();
-		specificFontSet = TRUE;
-	}*/
-	
-	//Fixed textSizeTagVal = Long2Fix(floor(newItem->textSize));
-//	ATSUAttributeValuePtr styleAttrValues[] = {&textSizeTagVal, &whiteColor, &trueBoolean};
-//	
-//	ATSUSetAttributes(newItem->textStyle, 3, styleAttrTags, styleAttrSizes, styleAttrValues);
-//	
 	
 	newItem->textStyle = style;
 	newItem->textLine = NULL;
@@ -180,7 +169,7 @@ void FMDisplayItemSetTextSize(FMDisplayItemRef item, CGFloat inSize)
 }
 
 void FMSetStyleTextSize(CFMutableDictionaryRef style, CGFloat size) {
-	CTFontRef font = CTFontCreateUIFontForLanguage(kCTFontSystemFontType, size, NULL);
+	CTFontRef font = CTFontCreateUIFontForLanguage(kCTFontEmphasizedSystemFontType, size, NULL);
 	
 	CFDictionarySetValue(style, kCTFontAttributeName, font);
 	CFRelease(font);	
@@ -360,7 +349,7 @@ void FMDisplayItemRenderText(FMDisplayItemRef item)
 		item->textOffsetX = -offsetX;
 		item->textOffsetY = -offsetY;
 		
-		printf("tf: %f, %f\n", item->textOffsetX, item->textOffsetY);
+		//printf("tf: %f, %f\n", item->textOffsetX, item->textOffsetY);
 		
 		if (bitmapW > 0 && bitmapH > 0)
 		{
@@ -373,8 +362,7 @@ void FMDisplayItemRenderText(FMDisplayItemRef item)
 			// zero the bitmap
 			memset(item->bitmapData, 0, item->bitmapHeight * item->bitmapWidth * 4);
 			
-			// NO SHADOW! messes up the QD bolding of text
-			//CGContextSetShadow(item->bitmapCtx, CGSizeMake(2.0, -2.0), 2.0);
+			CGContextSetShadow(item->bitmapCtx, CGSizeMake(2.0, -2.0), 1.0);
 			
 			CGContextSetTextPosition(item->bitmapCtx, -item->textOffsetX, -item->textOffsetY);
 			CTLineDraw(item->textLine, item->bitmapCtx);
