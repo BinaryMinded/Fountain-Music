@@ -61,15 +61,28 @@ static NSString *kWaitingForiTunesTerminationContext = @"kWaitingForiTunesTermin
 	}
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-	[self refreshProductIsInstalled];
-	
-	[self setSelectedOptionIndex:0];
+- (NSString *)productSourcePath {
+	return [[NSBundle mainBundle] pathForResource:[kProductFilename stringByDeletingPathExtension] ofType:[kProductFilename pathExtension]];
 }
 
 
-- (NSString *)productSourcePath {
-	return [[NSBundle mainBundle] pathForResource:[kProductFilename stringByDeletingPathExtension] ofType:[kProductFilename pathExtension]];
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+	if ([self productSourcePath] == nil) {
+		NSAlert *alert = [NSAlert alertWithMessageText:@"Installer Incomplete" 
+										 defaultButton:@"Quit Installer" 
+									   alternateButton:nil 
+										   otherButton:nil 
+							 informativeTextWithFormat:@"The installer is missing necessary components and cannot continue.  Please contact Binary Minded Software for assistance."];
+		
+		[alert setAlertStyle:NSCriticalAlertStyle];
+		[alert runModal];
+		
+		[NSApp terminate:nil];
+	}
+	
+	[self refreshProductIsInstalled];
+	
+	[self setSelectedOptionIndex:0];
 }
 
 - (NSImage *)productIcon {

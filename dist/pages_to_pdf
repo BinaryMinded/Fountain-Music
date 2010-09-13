@@ -1,0 +1,12 @@
+#!/usr/bin/osascript
+
+on run argv
+	-- USAGE: readme_to_pdf SOURCE DEST
+	-- Note: SOURCE and DEST must be given as absolute paths
+	set readme_file_path to POSIX file (item 1 of argv) as string
+	
+	tell application "Pages"
+		set readme_doc to open file readme_file_path
+		save readme_doc in (item 2 of argv)
+	end tell
+end

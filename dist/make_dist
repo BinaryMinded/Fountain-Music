@@ -1,0 +1,123 @@
+#!/usr/bin/ruby
+
+require 'fileutils'
+
+def mkdir_if_needed(dir)
+  begin
+    Dir.mkdir(dir)
+  rescue Errno::EEXIST
+    # it's ok!
+  end
+end
+
+def build_project(project_path, config, build_root)
+  mkdir_if_needed build_root
+  build_root = File.expand_path(build_root);
+  
+  Dir.chdir(project_path) do
+    system('xcodebuild', "-configuration", config, "OBJROOT="+build_root, "SYMROOT="+build_root)
+  end
+  
+  # return the location of the built product
+  File.join(build_root, config)
+end
+
+HEADER_PADDING = 10
+
+def stage(stage_title)
+  puts
+  header = "_"*HEADER_PADDING + " " + stage_title + " " + "_"*HEADER_PADDING
+  puts header
+  if block_given? 
+    result = yield 
+    puts "="*header.length
+    result
+  end
+end
+
+FM_BUNDLE_NAME = "Fountain Music.bundle"
+INSTALLER_APP_NAME = "Install Fountain Music.app"
+DMG_NAME = "Fountain Music.dmg"
+
+
+# chdir to the dist directory
+Dir.chdir(File.dirname(File.expand_path(__FILE__)))
+
+# setup the build directory
+mkdir_if_needed 'build'
+
+# change into the build directory
+Dir.chdir('build')
+mkdir_if_needed 'tmp'
+
+# build Fountain Music
+fm_product_dir = stage "Building Fountain Music" do
+  build_project('../../', 'Default', 'tmp/FountainMusic')
+end
+
+# build Fountain Music Installer
+installer_product_dir = stage "Building Installer" do
+  build_project('../../InstallFountainMusic', 'Release', "tmp/Installer")
+end
+
+# place the lime in the coco[a]nut
+installer_assembly_path = stage "Assembling Installer" do
+  installer_assembly_path = File.join("tmp", INSTALLER_APP_NAME)
+
+  system('ditto', File.join(installer_product_dir, INSTALLER_APP_NAME), installer_assembly_path)
+  system('ditto', File.join(fm_product_dir, FM_BUNDLE_NAME), 
+    File.join(installer_assembly_path, "Contents", "Resources", FM_BUNDLE_NAME))
+    
+  installer_assembly_path
+end
+
+# make a PDF of the readme
+readme_pdf_path = stage "Converting ReadMe to PDF" do
+  readme_pdf_path = File.expand_path("tmp/Read Me.pdf")
+  system("../pages_to_pdf", File.expand_path("../ReadMe.pages"), readme_pdf_path)
+  
+  readme_pdf_path
+end
+
+## put everything in a DMG
+temp_dmg_path = stage "Making DMG" do
+  mount_point = "tmp/mnt"
+  temp_dmg_path = File.join('tmp', DMG_NAME)
+
+  # make the DMG
+  FileUtils.rm(temp_dmg_path, :force => true)
+  system("hdiutil", "create", "-size", "1M", "-fs", "HFS+", '-volname', "Fountain Music", temp_dmg_path)
+
+  # mount the DMG
+  system("hdiutil", "attach", "-mountpoint", mount_point, temp_dmg_path)
+
+  # copy products over
+  system('ditto', installer_assembly_path, File.join(mount_point, INSTALLER_APP_NAME))
+  FileUtils.cp(readme_pdf_path, mount_point)
+  
+  # wait for changes to sync?
+  system('sync')
+  
+  # unmount the dmg
+  system("hdiutil", "detach", mount_point)
+  
+  temp_dmg_path
+end
+
+# convert to readonly dmg
+complete_dmg_path = stage "Preparing DMG for distribution" do
+  FileUtils.rm(DMG_NAME, :force => true) # remove existing dmgs
+  system("hdiutil", "convert", temp_dmg_path, "-format", "UDRO", "-o", DMG_NAME)
+  
+  DMG_NAME
+end
+
+# gzip it!
+compressed_dmg_path = stage "Compressing DMG" do
+  system('gzip', '-f', complete_dmg_path)
+  
+  complete_dmg_path+".gz"
+end
+
+puts
+puts "Done! The finished product is at #{File.expand_path(compressed_dmg_path)}"
