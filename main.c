@@ -36,8 +36,16 @@ void FMProcessAudioData(VisualPluginRenderMessage *renderMessage, VisualPluginDa
 void FMStepAnimations(VisualPluginData *myData);
 void FMRender(VisualPluginData *myData);
 
+#ifdef USE_CF_TIMER
 void StartRenderTimer(VisualPluginData *myData);
 void StopRenderTimer(VisualPluginData *myData);
+#else
+// no-ops, iTunes takes care of sending idles while playing
+inline void StartRenderTimer(VisualPluginData *myData) {};
+inline void StopRenderTimer(VisualPluginData *myData) {};
+#endif
+
+void StepAndRender(VisualPluginData *myData);
 
 Boolean PixelFormatAccelerated(AGLPixelFormat fmt);
 
@@ -123,19 +131,25 @@ static OSStatus VisualPluginHandler(OSType message, VisualPluginMessageInfo *mes
         #pragma mark kVisualPluginRenderMessage
         case kVisualPluginRenderMessage:
 			status = VPHandleRenderMessage(&(messageInfo->u.renderMessage), myData);
-            break;
+			break;
             
 
         
         #pragma mark kVisualPluginIdleMessage
         case kVisualPluginIdleMessage:
-			// Nothing to do. Idle messages are silly anyway, don't use them.
-            break;
+			
+			#ifndef USE_CF_TIMER
+			// we're using idles for timing
+			StepAndRender(myData);
+			#endif
+            
+			break;
 			
 			
 		#pragma mark kVisualPluginEventMessage
 		case kVisualPluginEventMessage:
 			status = VPHandleEventMessage(&(messageInfo->u.eventMessage), myData);
+			
 			break;
             
 		#pragma mark kVisualPluginPlayMessage
@@ -547,9 +561,14 @@ OSStatus VPHandleRenderMessage(VisualPluginRenderMessage *renderMessage, VisualP
 	OSStatus status = noErr;
 	if (myData->isActivated)
     {
-		// just process the data, don't even render (that's the render timer's responsibility)
+		// process the data
         FMProcessRenderData(myData, renderMessage->renderData);
 	}
+	
+	#ifndef USE_CF_TIMER
+	// we're using idles + renders for animation timing
+	StepAndRender(myData);
+	#endif
 	
 	return status;
 }
@@ -720,29 +739,32 @@ Boolean PixelFormatAccelerated(AGLPixelFormat fmt)
 
 #pragma mark -
 #pragma mark Render Timer
-void RenderTimerFired(CFRunLoopTimerRef timer, void *info) {
-	VisualPluginData *myData = info;
-	
+
+void StepAndRender(VisualPluginData *myData) {
+	// step animations and render the scene
 	if (myData->isActivated)
 	{
 		FMStepAnimations(myData);
 		FMRender(myData);
 	}
-	
+}
+
+#ifdef USE_CF_TIMER
+void RenderCFTimerFired(CFRunLoopTimerRef timer, void *info) {
+	StepAndRender((VisualPluginData*)info);
 }
 
 void StartRenderTimer(VisualPluginData *myData) {
+	// render scene and animate using CFRunLoopTimer-based callbacks
 	CFRunLoopTimerContext context = {0, myData, NULL, NULL, NULL};	
-	CFRunLoopTimerRef newTimer = CFRunLoopTimerCreate(kCFAllocatorDefault, 0, 1.0/60.0, 0, 0, RenderTimerFired, &context);
+	CFRunLoopTimerRef newTimer = CFRunLoopTimerCreate(kCFAllocatorDefault, 0, 1.0/60.0, 0, 0, RenderCFTimerFired, &context);
 	
 	myData->renderTimer = newTimer;
 	
 	CFRunLoopAddTimer(CFRunLoopGetCurrent(), newTimer, kCFRunLoopCommonModes);
-	
 }
 
 void StopRenderTimer(VisualPluginData *myData) {
-	
 	if (myData->renderTimer) {
 		CFRunLoopTimerInvalidate(myData->renderTimer);
 		CFRelease(myData->renderTimer);
@@ -750,4 +772,5 @@ void StopRenderTimer(VisualPluginData *myData) {
 	}
 }
 
+#endif
 
