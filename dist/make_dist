@@ -95,7 +95,11 @@ temp_dmg_path = stage "Making DMG" do
   system('ditto', installer_assembly_path, File.join(mount_point, INSTALLER_APP_NAME))
   FileUtils.cp(readme_pdf_path, mount_point)
   
-  # wait for changes to sync?
+  # set up window
+  system("../setup_finder_view", File.expand_path(mount_point))
+  #print("Set up the disk image view as you would like it to appear to users, then press return to continue…"); gets;
+
+  # wait for changes to sync
   system('sync')
   
   # unmount the dmg

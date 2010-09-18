@@ -1,0 +1,13 @@
+#!/usr/bin/osascript
+
+on run argv
+	-- USAGE: setup_finder_view MNT
+	-- Note: MNT must be given as absolute path
+	tell application "Finder"
+		open POSIX file (item 1 of argv) as string
+		set win to first Finder window
+		set current view of win to icon view
+		set icon size of icon view options of win to 292
+		set bounds of win to {219, 184, 896, 567}
+	end tell
+end

@@ -8,5 +8,6 @@ on run argv
 	tell application "Pages"
 		set readme_doc to open file readme_file_path
 		save readme_doc in (item 2 of argv)
+		close readme_doc
 	end tell
 end
