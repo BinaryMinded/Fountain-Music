@@ -37,7 +37,7 @@ end
 
 FM_BUNDLE_NAME = "Fountain Music.bundle"
 INSTALLER_APP_NAME = "Install Fountain Music.app"
-DMG_NAME = "Fountain Music.dmg"
+DMG_NAME = "FountainMusic.dmg"
 
 
 # chdir to the dist directory
