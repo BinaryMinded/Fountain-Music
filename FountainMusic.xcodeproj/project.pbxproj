@@ -341,7 +341,14 @@
 			isa = PBXProject;
 			buildConfigurationList = A6E9801908D50277009E81F1 /* Build configuration list for PBXProject "FountainMusic" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 089C166AFE841209C02AAC07 /* FountainMusic */;
 			projectDirPath = "";
 			projectRoot = "";
