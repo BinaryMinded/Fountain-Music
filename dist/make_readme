@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'json'
+require 'erb'
+require 'cgi'
+
+def h(s)
+  CGI.escapeHTML(s)
+end
+
+def base64_encode(s)
+  [s].pack("m").chomp
+end
+
+def data_url(filename, type)
+  data = File.read(File.join(File.dirname(__FILE__), filename))
+  "data:#{type};base64,#{base64_encode(data)}"
+end
+
+if ARGV.length < 2
+  puts "USAGE: make_readme TEMPLATE_PATH RELEASES_PATH [DEST_PATH]"
+  exit(1)
+end
+
+template_path = ARGV.shift
+releases_path = ARGV.shift
+destination_path = ARGV.shift
+
+template_text = File.read(template_path)
+releases_json = File.read(releases_path)
+
+releases = JSON.parse(releases_json)
+releases = releases.sort_by { |rel| Date.parse(rel['date'])}.reverse
+
+erb = ERB.new(template_text)
+if destination_path
+  result = erb.result(binding)
+  File.open(destination_path, "w") {|f| f.write(result)}
+else
+  erb.run(binding)
+end

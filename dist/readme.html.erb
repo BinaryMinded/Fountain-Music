@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Read Me: Fountain Music</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Brian Moore">
+	<!-- Date: 2011-01-21 -->
+	<style type="text/css" media="screen">
+		body {
+			font-family: "Helvetica Neue";
+			color: white;
+			background-color: black;
+			line-height: 1.3em;
+		}
+		a {
+			color: white;
+		}
+		
+		.page {
+			width: 620px;
+			margin: auto;
+			padding: 20px;
+		}
+		
+		.byline {
+			font-style: italic;
+		}
+		
+		.header .byline {
+			margin-top: 0px;
+		}
+		
+		.header h1 {
+			margin-bottom: 0px;
+		}
+		
+		.screenshot {
+			text-align: center;
+			margin: 20px;
+		}
+		
+		.screenshot img {
+			max-width: 100%;
+		}
+		
+		td.key {
+			text-align: center;
+			font-family: "Menlo", "Monaco", "fixed";
+		}
+		
+		.footer {
+			text-align: center;
+			font-style: italic;
+			font-size: 0.9em;
+		}
+		
+		ol.release-history {
+			list-style: none;
+			padding: 0px;
+		}
+		
+		.footnote {
+		}
+		
+	</style>
+</head>
+<body>
+<div class='page'>
+<div class='header'>
+<h1>Fountain Music 2.3</h1>
+<div class='byline'>Brian Moore</div>
+</div>
+<div class='screenshot'>
+<img src="<%= data_url("screenshot.png", "image/png")%>">
+</div>
+<h2>Installation</h2>
+<p>To install Fountain Music, just launch the installer (&ldquo;Install Fountain Music&rdquo;) and click install.  Once installation is complete, you will need to restart iTunes to start using Fountain Music.</p>
+
+<h2>Use</h2>
+<p>To activate Fountain Music, simply select it in the View &gt; Visualizer menu and activate the visualizer with &ldquo;Show Visualizer&rdquo; in the View menu.  You can enter or exit full screen mode by pressing  &#x2318;-F.</p>
+
+<p>Once Fountain Music has been launched, you can display the current track info by pressing the letter &lsquo;i&rsquo;. The &lsquo;[ ]&rsquo; and &lsquo;\&rsquo; keys are used to control the fountain patterns.  Pressing &lsquo;[&lsquo; and &lsquo;]&rsquo; selects the previous and next patterns, respectively. Pressing &lsquo;\&rsquo; stops the pattern from switching on its own.</p>
+
+<p>Just below the pattern controls, the &lsquo;;&rsquo; (semicolon) and &lsquo;&#x27;&rsquo; (single quote) keys change the color scheme, switching to the next and previous color schemes, respectively.
+By pressing the &lsquo;&lt;&lsquo; and &lsquo;&gt;&rsquo; keys, you can make the particles have fuzzier or sharper edges, respectively.  The &lsquo;~&rsquo; key will display the advanced menu, which tells of the keys to press to see the frame rate (&lsquo;f&rsquo; key) or number of particles (&lsquo;p&rsquo; key).</p>
+
+<p>The &lsquo;+&rsquo; and &lsquo;-&rsquo; keys make the particles bigger and smaller, respectively. &lsquo;v&rsquo; shows the current version.  If you forget any of these controls, there is a menu available by pressing &lsquo;h&rsquo;, &lsquo;?&rsquo;, or &lsquo;~&rsquo;.</p>
+
+<p>To summarize, the key commands are:</p>
+<table>
+<col width=70>
+<col>
+<tbody>
+<tr><td class='key'>h ?</td><td class='desc'>display the help menu</td></tr>
+<tr><td class='key'>+ -</td><td class='desc'>increase or decrease particle size</td></tr>
+<tr><td class='key'>[ ] \</td><td class='desc'>previous/next/lock fountain pattern</td></tr>
+<tr><td class='key'>; &lsquo;</td><td class='desc'>previous/next color scheme</td></tr>
+<tr><td class='key'>&lt; &gt;</td><td class='desc'>fuzzier/sharper edges</td></tr>
+<tr><td class='key'>i</td><td class='desc'>display track info</td></tr>
+<tr><td class='key'>~</td><td class='desc'>display advanced menu</td></tr>
+<tr><td class='key'>p</td><td class='desc'>toggle particle count</td></tr>
+<tr><td class='key'>f</td><td class='desc'>toggle frame rate display</td></tr>
+<tr><td class='key'>v</td><td class='desc'>show version</td></tr>
+</tbody></table>
+
+<p>Finally, the settings dialog is accessible via the &ldquo;Options&hellip;&rdquo; menu item at the end of the View &gt; Visualizer menu.  The &ldquo;Default&rdquo; button will return all preferences to their original values.  &ldquo;OK&rdquo; closes the dialog window and keeps all changes you have made. &ldquo;Cancel&rdquo; also closes the window, but does not save your changes.</p>
+
+<h2>About the Color Schemes</h2>
+<p>Beginning with version 2.0, there are a variety of color schemes included with Fountain Music.  These schemes determine what colors particles will be.  Some color schemes change subtly over time, so if you wait for a few seconds the fountain may have an entirely different feel to it. In more detail, the color schemes are:</p>
+
+<ul>
+<li><span class='title'>Classic</span>: the original Fountain Music color scheme.  The fountain progresses slowly through the color wheel.</li>
+<li><span class='title'>Red, White and Blue</span>: you know that these three colors are the main colors of the flags of Chile, France, Liberia, Malaysia, The Netherlands, Nepal, North Korea, Norway, Iceland, Panama, Puerto Rico, Taiwan, Luxembourg and the UK? <span class='footnote'>(CIA World Factbook)</span>  Hmm, wait a second, that list seems a bit short, I definitely forgot a few minor places.  Oh well, email me if you figure it out..</li>
+<li><span class='title'>Fire</span>: Your music bursts into flames with this color scheme!  Okay, not literally, that would be bad, but it does look nice and warm.  Large particles with fuzzy edges are recommended for the full firey effect.</li>
+<li><span class='title'>Random</span>: Particles appear in whatever color they feel like. Reminds me of a birthday party, or clowns, or rainbow sprinkles.  Mmmm, rainbow sprinkles.</li>
+<li><span class='title'>Sea</span>: A blue-greenish color scheme.  The fountain looks vaguely like elegantly flowing water from the deep sea&hellip; after it has been thrown into a blender with some seaweed and blue food coloring.</li>
+<li><span class='title'>Snow</span>: A pure white color scheme. Make snow with your music!</li>
+</ul>
+
+<h2>Source Code</h2>
+<p>If you would like the source code for Fountain Music, you can get it under a BSD-style license!  Just go to the Fountain Music section of <a href="http://www.binaryminded.com">www.binaryminded.com</a>.</p>
+
+<div class='contact-info'>
+<div>Binary Minded Software</div>
+<div><a href="http://www.binaryminded.com">www.binaryminded.com</a></div>
+<div>bmoore [at] binaryminded [dot] com</div>
+</div>
+
+<h2>Version History</h2>
+<ol class='release-history'>
+<% releases.each do |release| %>
+<li><h3><%= h(Date.parse(release["date"]).strftime("%B %e, %Y")) %>, v<%= h(release['version']) %></h3>
+	<ul>
+	<% release["changes"].each do |change|%>
+		<li><%= h(change) %></li>
+	<% end %>
+	</ul>
+</li>
+<% end %>
+</ol>
+<div class='footer'>Copyright © 2005-2011 Binary Minded Software</div>
+</div>
+</body>
+</html>

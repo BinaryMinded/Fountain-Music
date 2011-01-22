@@ -8,6 +8,8 @@ on run argv
 		set win to first Finder window
 		set current view of win to icon view
 		set icon size of icon view options of win to 292
-		set bounds of win to {219, 184, 896, 567}
+		set bounds of win to {219, 184, 920, 567}
+		set arrangement of icon view options of win to arranged by name
+		set extension hidden of items of win to true
 	end tell
 end

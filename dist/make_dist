@@ -10,6 +10,11 @@ def mkdir_if_needed(dir)
   end
 end
 
+def fail(str=nil, code=1)
+  $stderr.puts("Error: " + str) if str
+  exit(code)
+end
+
 def build_project(project_path, config, build_root)
   mkdir_if_needed build_root
   build_root = File.expand_path(build_root);
@@ -71,12 +76,13 @@ installer_assembly_path = stage "Assembling Installer" do
   installer_assembly_path
 end
 
-# make a PDF of the readme
-readme_pdf_path = stage "Converting ReadMe to PDF" do
-  readme_pdf_path = File.expand_path("tmp/Read Me.pdf")
-  system("../pages_to_pdf", File.expand_path("../ReadMe.pages"), readme_pdf_path)
+# make an HTML of the readme
+readme_html_path = stage "Generating ReadMe as HTML" do
+  readme_html_path = File.expand_path("tmp/Read Me.html")
+  system("../make_readme", File.expand_path("../readme.html.erb"), File.expand_path("../releases.json"), readme_html_path)
+  fail unless $?.success?
   
-  readme_pdf_path
+  readme_html_path
 end
 
 ## put everything in a DMG
@@ -86,14 +92,14 @@ temp_dmg_path = stage "Making DMG" do
 
   # make the DMG
   FileUtils.rm(temp_dmg_path, :force => true)
-  system("hdiutil", "create", "-size", "1M", "-fs", "HFS+", '-volname', "Fountain Music", temp_dmg_path)
+  system("hdiutil", "create", "-size", "2M", "-fs", "HFS+", '-volname', "Fountain Music", temp_dmg_path)
 
   # mount the DMG
   system("hdiutil", "attach", "-mountpoint", mount_point, temp_dmg_path)
 
   # copy products over
   system('ditto', installer_assembly_path, File.join(mount_point, INSTALLER_APP_NAME))
-  FileUtils.cp(readme_pdf_path, mount_point)
+  FileUtils.cp(readme_html_path, mount_point)
   
   # set up window
   system("../setup_finder_view", File.expand_path(mount_point))

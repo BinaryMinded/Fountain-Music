@@ -1,0 +1,111 @@
+[{
+    "date": "June 3, 2003",
+    "version": "1.0",
+    "changes": ["Initial release"]
+},
+{
+    "date": "August 5, 2003",
+    "version": "1.1",
+    "changes": [
+      "Changed the fountain around a bit",
+      "Much more responsive to the music",
+      "Added 6 different fountain modes",
+      "Added a menu feature accessible by typing ‘?’ or ‘h’",
+      "The particle size is controllable by ‘+’ and ‘-’",
+      "Other minor improvements and bug fixes"]
+},
+{
+    "date": "August 21, 2003",
+    "version": "1.11",
+    "changes": [
+      "Added control over the modes",
+      "Speed improved",
+      "Both audio channels are used",
+      "Fixed a bug which prevented some from using it"]
+},
+{
+    "date": "August 24, 2003",
+    "version": "1.12",
+    "changes": [
+      "Fixed a bug which caused iTunes to crash when the user rated a song",
+      "Added control over the particle edge sharpness (< and > keys)",
+      "Added FPS and particle counters (f and p keys, respectively)",
+      "Added an advanced menu (‘~’ key)",
+      "Now remembers settings between uses",
+      "Many internal improvements and some minor graphical bugs fixed"]
+},
+{
+    "date": "December 24, 2003",
+    "version": "1.14",
+    "changes": [
+      "Two new modes, Starfish and Flower, bringing the total to 8",
+      "Speed improvements",
+      "Four months worth of minor tweaks"]
+},
+{
+    "date": "December 30, 2003",
+    "version": "1.15",
+    "changes": [
+      "Full resolution in full screen, ‘r’ key rotates resolutions",
+      "Version display (k key)"]
+},
+{
+    "date": "June 18, 2004",
+    "version": "1.2",
+    "changes": [
+      "Controllable gravity",
+      "Settings dialog, controls gravity, particle size, edges, etc.",
+      "Save preferences between relaunches of iTunes",
+      "Continuous FPS calculation",
+      "Smoother motion at low frame rates",
+      "Option to always show track info",
+      "Some graphical tweaks"]
+},
+{
+    "date": "December 29, 2005",
+    "version": "2.0",
+    "changes": [
+      "Antialiased text",
+      "Multiple color schemes",
+      "Easy installer and uninstaller",
+      "Gravity control range expanded",
+      "Minor speed and graphical improvements, as always"]
+},
+{
+    "date": "March 31, 2006",
+    "version": "2.1",
+    "changes": [
+      "Universal binary",
+      "Full unicode support for track names",
+      "Control over text size for track info"]
+},
+{
+    "date": "November 17, 2006",
+    "version": "2.2",
+    "changes": [
+      "Overall stability improvements",
+      "Released as free software under the GPL"]
+},
+{
+    "date": "August 16, 2007",
+    "version": "2.23",
+    "changes": ["Fixed “glitchy/broken window” bug"]
+},
+{
+    "date": "June 9, 2008",
+    "version": "2.25",
+    "changes": ["Slightly refined particle appearance"]
+},
+{
+    "date": "January 24, 2010",
+    "version": "2.3",
+    "changes": [
+      "Requires iTunes 10 and Mac OS X Snow Leopard",
+      "Fixes reduced frame-rate issue while playing music",
+      "Overall smoother animation",
+      "Refined appearance of on-screen text",
+      "Consumes fewer resources when not activated",
+      "Removes support for selecting full screen resolution",
+      "New, simpler install process",
+      "Source re-released under a BSD-style license"]
+}]
