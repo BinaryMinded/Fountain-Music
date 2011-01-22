@@ -80,6 +80,13 @@ static NSString *kWaitingForiTunesTerminationContext = @"kWaitingForiTunesTermin
 		[NSApp terminate:nil];
 	}
 	
+	[[NSNotificationCenter defaultCenter] addObserverForName:NSWindowWillCloseNotification
+													  object:[self window]
+													   queue:[NSOperationQueue mainQueue]
+												  usingBlock:^(NSNotification *arg1) {
+													  [NSApp terminate:nil];
+												  }];
+
 	[self refreshProductIsInstalled];
 	
 	[self setSelectedOptionIndex:0];
