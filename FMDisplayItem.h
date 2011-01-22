@@ -2,7 +2,7 @@
  *  FMDisplayItem.h
  *  FountainMusic
  *
- *  Copyright 2005, 2006 Brian Moore
+ *  Copyright 2005-2011 Brian Moore
  *
  */
 

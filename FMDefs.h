@@ -2,7 +2,7 @@
  *  FMDefs.h
  *  FountainMusic
  *
- *  Copyright 2003, 2004, 2005, 2006 Brian Moore
+ *  Copyright 2003-2011 Brian Moore
  *
  */
 

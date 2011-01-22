@@ -2,7 +2,7 @@
  *  main.c
  *  main entry point for Fountain Music
  *
- *  Copyright 2003, 2004, 2005, 2006, 2007 Brian Moore
+ *  Copyright 2003-2011 Brian Moore
  *
  */
 

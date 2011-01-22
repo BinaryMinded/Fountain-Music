@@ -2,7 +2,7 @@
  *  FMConfigure.c
  *  FountainMusic
  *
- *  Copyright 2004, 2005, 2006 Brian Moore
+ *  Copyright 2004-2011 Brian Moore
  *
  */
 
