@@ -627,7 +627,7 @@ void Setup3DSystem(VisualPluginData *myData)
     GLint bufferRect[4];
     
     Rect portRect;
-    // **WINDOWS_DIFF** is this tomfoolery neccesary on doze?
+
     GetWindowPortBounds (GetWindowFromPort(myData->destPort), &portRect);
     bufferRect[0] = myData->destRect.left;
     bufferRect[1] = portRect.bottom - myData->destRect.bottom;
