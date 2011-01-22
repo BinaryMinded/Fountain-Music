@@ -238,12 +238,7 @@ static OSStatus VisualPluginHandler(OSType message, VisualPluginMessageInfo *mes
 		#pragma mark kVisualPluginUpdateMessage
 		case kVisualPluginUpdateMessage:
 				
-			if (myData->isActivated)
-			{
-				RenderScene(myData);
-				
-				FMSwapBuffers(myData);
-			}
+			FMRender(myData);
 			
 			break;
 			
@@ -549,10 +544,12 @@ void FMStepAnimations(VisualPluginData *myData) {
 }
 
 void FMRender(VisualPluginData *myData) {
-	aglSetCurrentContext(myData->glContext);
-	
-	RenderScene(myData);
-	FMSwapBuffers(myData);
+	if (myData->isActivated) {
+		aglSetCurrentContext(myData->glContext);
+
+		RenderScene(myData);
+		FMSwapBuffers(myData);
+	}
 }
 
 OSStatus VPHandleRenderMessage(VisualPluginRenderMessage *renderMessage, VisualPluginData *myData)
