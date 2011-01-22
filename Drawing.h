@@ -39,7 +39,8 @@ void Setup3DSystem(VisualPluginData *myData);
 void Setup2DSystem(VisualPluginData *myData);
 
 #ifdef ALBUM_ART
-void CopyAlbumArtToTexture(VisualPluginData *myData, Handle artHandle, OSType artType);
+void SetAlbumArt(VisualPluginData *myData, Handle artHandle, OSType artType);
+void ClearAlbumArt(VisualPluginData *myData);
 #endif
 
 #endif

@@ -10,7 +10,9 @@
 
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
-
+#ifdef ALBUM_ART
+#include <QuickTime/QuickTimeComponents.h>
+#endif
 #include "Drawing.h"
 
 #define LEFT_MARGIN 15.0
@@ -673,15 +675,21 @@ void Setup2DSystem(VisualPluginData *myData)
 }
 
 #ifdef ALBUM_ART
+void ClearAlbumArt(VisualPluginData *myData) {
+	
+}
 
-void CopyAlbumArtToTexture(VisualPluginData *myData, Handle artHandle, OSType artType);
+void SetAlbumArt(VisualPluginData *myData, Handle artHandle, OSType artType)
 {
-	ComponentInstance importer;
+	OSErr err = noErr;
+	
+	ComponentInstance importer = NULL;
 
 	// get the graphics importer
-	GetGraphicsImporterForDataRef(artHandle, artType, &importer);
-	
-	
+	err = GetGraphicsImporterForDataRef(artHandle, artType, &importer);
+	if (err != noErr) {
+		fprintf(stderr, "Fountain Music Error: Could not get graphics importer (err %i)\n", err);
+	}
 	
 	// close it up!
 	CloseComponent(importer);

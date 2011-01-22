@@ -167,13 +167,12 @@ static OSStatus VisualPluginHandler(OSType message, VisualPluginMessageInfo *mes
 			Handle artHandle;
 			OSType artType;
 			
-			printf("getting album art...\n");
 			PlayerGetCurrentTrackCoverArt(myData->appCookie, myData->appProc, &artHandle, &artType);
-			printf("got album art! type:%.4s\n", (char *)(&artType));
 			
 			// must open and use a GraphicsImporter component to decode image,
 			// then transfer into a texture...
-			if (artType != NULL) CopyAlbumArtToTexture(myData, artHandle, artType);
+			if (artType != 0) SetAlbumArt(myData, artHandle, artType);
+			else ClearAlbumArt(myData);
 			
 			#endif
 			
