@@ -70,6 +70,27 @@
       white-space: nowrap; min-width: 54px; text-align: center;
     }
     .m-sep { color: rgba(255,255,255,0.15); font-size: 18px; }
+    #m-transport {
+      width: 100%; display: none;
+      align-items: center; gap: 8px; padding-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.08); margin-top: 2px;
+    }
+    #m-seek {
+      -webkit-appearance: none; appearance: none;
+      flex: 1; height: 3px;
+      background: rgba(255,255,255,0.25); border-radius: 2px; outline: none;
+      cursor: pointer;
+    }
+    #m-seek::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; cursor: pointer;
+    }
+    #m-seek::-moz-range-thumb {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; border: none; cursor: pointer;
+    }
+    #m-time { color: rgba(255,255,255,0.6); font-size: 11px; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -126,6 +147,11 @@
     </div>
     <span class="m-sep">|</span>
     <button class="m-btn" id="m-info" title="Track info">ℹ</button>
+    <div id="m-transport">
+      <button class="m-btn" id="m-playpause">⏸</button>
+      <input type="range" id="m-seek" min="0" step="0.1" value="0">
+      <span id="m-time">0:00 / 0:00</span>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -668,6 +694,8 @@
 
       // Audio
       this.analyser    = null;
+      this.audio       = null;   // HTMLAudioElement when playing a file
+      this._seeking    = false;  // true while user drags the seek bar
       this.isRunning   = false;
 
       // Track info
@@ -744,6 +772,24 @@
       mb('m-blur-dn',  () => { this.sharpness = Math.max(0, this.sharpness - 0.25); this._rebuildTexture(); this._showOverlay('Edges: ' + this._sharpLabel(), 2000); });
       mb('m-blur-up',  () => { this.sharpness = Math.min(1, this.sharpness + 0.25); this._rebuildTexture(); this._showOverlay('Edges: ' + this._sharpLabel(), 2000); });
       mb('m-info',     () => { if (this.trackTitle) this._showOverlay([this.trackTitle, this.trackArtist].filter(Boolean).join('\n'), 5000); });
+
+      // Transport controls (file mode only)
+      mb('m-playpause', () => {
+        if (!this.audio) return;
+        if (this.audio.paused) this.audio.play();
+        else this.audio.pause();
+      });
+      const seek = document.getElementById('m-seek');
+      if (seek) {
+        seek.addEventListener('pointerdown', () => { this._seeking = true; });
+        seek.addEventListener('pointerup',   () => {
+          this._seeking = false;
+          if (this.audio) this.audio.currentTime = parseFloat(seek.value);
+        });
+        seek.addEventListener('input', () => {
+          if (this.audio) this.audio.currentTime = parseFloat(seek.value);
+        });
+      }
     }
 
     async _startMic() {
@@ -763,8 +809,10 @@
       const audio = new Audio();
       audio.src   = URL.createObjectURL(file);
       audio.loop  = true;
-      const ctx   = new AudioContext();
-      const src   = ctx.createMediaElementSource(audio);
+      this.audio  = audio;
+
+      const ctx = new AudioContext();
+      const src = ctx.createMediaElementSource(audio);
       src.connect(ctx.destination);
       this._connectAnalyser(ctx, src);
       // Both must be called synchronously within the user-gesture handler;
@@ -772,10 +820,41 @@
       ctx.resume();
       audio.play().catch(err => this._showError('Playback failed: ' + err.message));
 
+      // Wire up transport UI
+      audio.addEventListener('loadedmetadata', () => {
+        const seek = document.getElementById('m-seek');
+        if (seek) seek.max = audio.duration;
+        this._updateTransport();
+      });
+      audio.addEventListener('timeupdate', () => this._updateTransport());
+      audio.addEventListener('play',  () => {
+        const btn = document.getElementById('m-playpause');
+        if (btn) btn.textContent = '⏸';
+      });
+      audio.addEventListener('pause', () => {
+        const btn = document.getElementById('m-playpause');
+        if (btn) btn.textContent = '▶';
+      });
+
       this.trackTitle  = file.name.replace(/\.[^.]+$/, '');
       this.trackArtist = '';
       this._showOverlay(this.trackTitle, 5000);
       this._hideStartUI();
+      document.getElementById('m-transport').style.display = 'flex';
+    }
+
+    _fmtTime(s) {
+      if (!isFinite(s)) return '0:00';
+      const m = Math.floor(s / 60);
+      return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+    }
+
+    _updateTransport() {
+      if (!this.audio) return;
+      const seek = document.getElementById('m-seek');
+      const time = document.getElementById('m-time');
+      if (!this._seeking && seek) seek.value = this.audio.currentTime;
+      if (time) time.textContent = this._fmtTime(this.audio.currentTime) + ' / ' + this._fmtTime(this.audio.duration);
     }
 
     _connectAnalyser(ctx, source) {
