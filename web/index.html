@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fountain Music</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; overflow: hidden; font-family: 'Helvetica Neue', Arial, sans-serif; }
+    #canvas-container { width: 100vw; height: 100vh; }
+
+    #ui {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center; color: #fff; z-index: 10;
+    }
+    #ui h1 { font-size: 2rem; margin-bottom: 0.5rem; font-weight: 300; letter-spacing: 0.15em; }
+    #ui p { color: rgba(255,255,255,0.5); margin-bottom: 1.8rem; font-size: 0.85rem; }
+    .btn {
+      display: inline-block; margin: 0.35rem; padding: 0.55rem 1.4rem;
+      border: 1px solid rgba(255,255,255,0.35); border-radius: 3px; cursor: pointer;
+      background: rgba(255,255,255,0.04); color: #fff; font-size: 0.82rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.6); }
+    #file-input { display: none; }
+
+    #overlay {
+      position: fixed; bottom: 20px; left: 15px;
+      color: rgba(255,255,255,0.85); font-size: 12px; line-height: 1.7;
+      pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+      display: none; white-space: pre-line;
+    }
+    #hud {
+      position: fixed; bottom: 20px; right: 15px;
+      color: rgba(255,255,255,0.4); font-size: 11px; line-height: 1.8;
+      pointer-events: none; text-align: right; display: none;
+    }
+    #keys {
+      position: fixed; top: 15px; right: 15px;
+      color: rgba(255,255,255,0.45); font-size: 11px; line-height: 1.9;
+      pointer-events: none; text-align: right; display: none;
+    }
+    #error {
+      position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,100,100,0.9); font-size: 12px; display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div id="ui">
+    <h1>Fountain Music</h1>
+    <p>A port of the classic iTunes visualizer by Brian Moore</p>
+    <div>
+      <div class="btn" id="mic-btn">Use Microphone</div>
+      <label class="btn" for="file-input">Open Audio File</label>
+      <input type="file" id="file-input" accept="audio/*,video/*">
+    </div>
+  </div>
+
+  <div id="overlay"></div>
+  <div id="hud"></div>
+  <div id="keys">
+    [ ]  prev / next pattern<br>
+    \  lock / unlock pattern<br>
+    ; '  prev / next color<br>
+    - +  particle size<br>
+    &lt; &gt;  fuzzier / crisper<br>
+    i  track info<br>
+    h  toggle this help
+  </div>
+  <div id="error"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+  // =============================================================================
+  //  Fountain Music — Web Port
+  //  Original: Copyright 2003–2011 Brian Moore (BSD License)
+  //  Web Port: Three.js + Web Audio API
+  // =============================================================================
+
+  const MAX_PARTICLES   = 6000;
+  const NUM_SPECTRUM    = 256;
+  const NUM_CHANNELS    = 2;
+  const SHORT_BUF_SIZE  = 5;
+  const LONG_BUF_SIZE   = 60;
+  const GRAVITY         = -10.0;
+  const ROTATION_DEG_S  = 20.0;            // degrees/sec, matches original
+  const PARTICLE_THRESHOLD = 0.007;
+  const COLOR_TABLE_SPEED  = 3.0;          // columns/sec, matches original
+  const SPRAY_HEIGHT    = 23.0;
+
+  const MODE_NAMES = [
+    'Radar', 'Alternating', 'Solid', 'Dual Radar',
+    'Wings', 'Spiral', 'Starfish', 'Flower'
+  ];
+
+  // ---------------------------------------------------------------------------
+  //  Math helpers
+  // ---------------------------------------------------------------------------
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  /** Gaussian sample via Box–Muller */
+  function gauss(mean, sd) {
+    let u, v;
+    do { u = Math.random(); } while (u === 0);
+    do { v = Math.random(); } while (v === 0);
+    return mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  /**
+   * asinq: return the angle whose sin is x, in the given quadrant offset.
+   * Replicates the original FountainModes asinq used for Flower mode.
+   */
+  function asinq(x, quadOffset) {
+    x = Math.max(-1, Math.min(1, x));
+    const base = Math.asin(x);
+    const q = ((quadOffset % 4) + 4) % 4;
+    let theta;
+    if      (q === 0) theta = base;
+    else if (q === 1) theta = Math.PI - base;
+    else if (q === 2) theta = Math.PI + base;
+    else              theta = 2 * Math.PI - base;
+    theta += Math.floor(quadOffset / 4) * 2 * Math.PI;
+    return theta;
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Rolling audio buffer  (mirrors FMAudioProcessing.c)
+  // ---------------------------------------------------------------------------
+  class AudioRingBuffer {
+    constructor(capacity) {
+      this.capacity = capacity;
+      this.head     = 0;
+      this.samples  = Array.from({ length: capacity }, () =>
+        [new Float32Array(NUM_SPECTRUM), new Float32Array(NUM_SPECTRUM)]
+      );
+      this.average  = [new Float32Array(NUM_SPECTRUM), new Float32Array(NUM_SPECTRUM)];
+    }
+
+    /** Insert one frame of raw Uint8 spectrum data (2 channels × 256 bins). */
+    insert(data) {
+      this.head = (this.head + 1) % this.capacity;
+      for (let c = 0; c < NUM_CHANNELS; c++)
+        for (let i = 0; i < NUM_SPECTRUM; i++)
+          this.samples[this.head][c][i] = data[c][i] / 255.0;
+    }
+
+    computeAverage() {
+      for (let c = 0; c < NUM_CHANNELS; c++) {
+        this.average[c].fill(0);
+        for (let s = 0; s < this.capacity; s++)
+          for (let i = 0; i < NUM_SPECTRUM; i++)
+            this.average[c][i] += this.samples[s][c][i] / this.capacity;
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Particle  (mirrors Particle3D struct + StepParticle / GetParticleColor)
+  // ---------------------------------------------------------------------------
+  class Particle {
+    constructor() {
+      this.px = this.py = this.pz = 0;
+      this.vx = this.vy = this.vz = 0;
+      this.ax = this.ay = this.az = 0;
+      this.r  = this.g  = this.b  = 1;
+      this.size        = 1;
+      this.rotateSpeed = 0;
+      this.rotation    = 0;
+      this.yDimStart   = 0;
+      this.yDimEnd     = -1;
+      this.timeToDie   = 0;
+      this.alive       = false;
+    }
+
+    reset() {
+      this.px = this.py = this.pz = 0;
+      this.vx = this.vy = this.vz = 0;
+      this.ax = this.ay = this.az = 0;
+      this.r  = this.g  = this.b  = 1;
+      this.size        = 1;
+      this.rotateSpeed = rand(-6, 6);
+      this.rotation    = 0;
+      this.yDimStart   = 0;    // fade begins here
+      this.yDimEnd     = -1;   // particle dies here
+      this.timeToDie   = 0;
+      this.alive       = false;
+    }
+
+    /** Parabolic Euler integration — matches StepParticle() exactly. */
+    step(dt) {
+      this.vx += this.ax * dt;
+      this.vy += this.ay * dt;
+      this.vz += this.az * dt;
+
+      this.px += this.vx * dt + 0.5 * this.ax * dt * dt;
+      this.py += this.vy * dt + 0.5 * this.ay * dt * dt;
+      this.pz += this.vz * dt + 0.5 * this.az * dt * dt;
+
+      this.rotation += this.rotateSpeed * dt;
+      this.timeToDie -= dt;
+    }
+
+    isDead() {
+      return this.py < this.yDimEnd || this.timeToDie < 0;
+    }
+
+    /** Returns [r, g, b] with yDim fade applied — matches GetParticleColor(). */
+    getColor() {
+      let dim = 1;
+      if (this.py < this.yDimStart) {
+        const dist = this.yDimStart - this.yDimEnd;
+        if (dist > 1e-4) dim = 1 - (this.yDimStart - this.py) / dist;
+      }
+      return [this.r * dim, this.g * dim, this.b * dim];
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Particle pool  (replaces FMList-based ParticleSupply)
+  // ---------------------------------------------------------------------------
+  class ParticlePool {
+    constructor() {
+      this.all      = Array.from({ length: MAX_PARTICLES }, () => new Particle());
+      this.active   = [];
+      this.inactive = [...this.all];
+    }
+
+    get() {
+      if (this.inactive.length === 0) return null;
+      const p = this.inactive.pop();
+      p.reset();
+      p.alive = true;
+      this.active.push(p);
+      return p;
+    }
+
+    step(dt) {
+      for (let i = this.active.length - 1; i >= 0; i--) {
+        const p = this.active[i];
+        p.step(dt);
+        if (p.isDead()) {
+          p.alive = false;
+          this.active.splice(i, 1);
+          this.inactive.push(p);
+        }
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Fountain modes  (mirrors FountainModes.c — all 8 modes)
+  // ---------------------------------------------------------------------------
+  class FountainMode {
+    constructor() {
+      this.mode          = 2;   // start on Solid
+      this.locked        = false;
+      this.time          = 0;
+      this.switchAt      = 15;
+      this.param         = 1;
+      this._init(2);
+    }
+
+    _init(mode) {
+      this.mode  = mode;
+      this.time  = 0;
+      this.param = this._randomParam(mode);
+      this.switchAt = this._switchTime(mode, this.param);
+    }
+
+    _randomParam(m) {
+      switch (m) {
+        case 0: return rand(1, 2);                                   // Radar: rad/sec
+        case 1: return 2 * Math.PI / Math.floor(rand(8, 24));        // Alternating: block angle
+        case 2: return 1;                                            // Solid
+        case 3: return rand(1, 2);                                   // Dual Radar
+        case 4: return rand(1, 2);                                   // Wings
+        case 5: return Math.floor(rand(2, 11));                      // Spiral: arm count
+        case 6: return Math.random() < 0.5 ? 3 : 5;                 // Starfish: arm count
+        case 7: return (3 + Math.floor(Math.random() * 4)) / 2.0;   // Flower: k/2 petals
+        default: return 1;
+      }
+    }
+
+    _switchTime(m, p) {
+      // Radar-family: switch after ~4 full rotations
+      if (m === 0 || m === 3 || m === 4) return 8 * Math.PI / p;
+      return 15;
+    }
+
+    step(dt) {
+      this.time += dt;
+      if (!this.locked && this.time > this.switchAt) {
+        let next;
+        do { next = Math.floor(Math.random() * 8); } while (next === this.mode);
+        this._init(next);
+      }
+    }
+
+    /**
+     * setupParticle: sets position, velocity, size of a particle.
+     * Mirrors FMFountainModeSetupParticle() for all 8 modes.
+     *
+     * @param {Particle} p
+     * @param {number} freqPct   0–1  (i / 255)
+     * @param {number} ampPct    0–1  relative amplitude
+     * @param {number} chan      0 or 1
+     */
+    setupParticle(p, freqPct, ampPct, chan) {
+      const masterRadius = 8.0;
+      p.size = Math.max(0.01, gauss(1.0, 0.2));
+
+      const radius = freqPct * masterRadius;
+      let angle;
+
+      switch (this.mode) {
+        case 0: // Radar
+          angle = this.param * this.time;
+          break;
+
+        case 1: { // Alternating
+          // Reject angles in blocks that match the current parity
+          let a;
+          let tries = 0;
+          do {
+            a = rand(0, 2 * Math.PI);
+            tries++;
+          } while (tries < 20 && Math.floor(a / this.param) % 2 === Math.floor(this.time) % 2);
+          angle = a;
+          break;
+        }
+
+        case 2: // Solid
+          angle = rand(0, 2 * Math.PI);
+          break;
+
+        case 3: // Dual Radar
+          angle = chan * Math.PI + this.param * this.time;
+          break;
+
+        case 4: // Wings
+          angle = chan
+            ? this.param * this.time
+            : Math.PI - this.param * this.time;
+          break;
+
+        case 5: // Spiral
+          angle = 2 * Math.PI * this.param * freqPct;
+          break;
+
+        case 6: // Starfish
+          angle = 0.35 * Math.sin(3 * (freqPct * Math.PI + this.time))
+                + 2 * Math.PI * Math.floor(Math.random() * this.param) / this.param;
+          break;
+
+        case 7: // Flower / Rose
+          angle = asinq(freqPct, 2 * Math.floor(Math.random() * (this.param * 2)) + chan)
+                / this.param;
+          break;
+
+        default:
+          angle = rand(0, 2 * Math.PI);
+      }
+
+      // Position at the ring
+      p.px = Math.cos(angle) * radius;
+      p.py = 0;
+      p.pz = Math.sin(angle) * radius;
+
+      // Outward velocity with small angular jitter
+      const jitter    = rand(-0.1, 0.1);
+      const speedR    = freqPct * 2.2 + 0.8;
+      p.vx = speedR * Math.cos(angle + jitter);
+      p.vz = speedR * Math.sin(angle + jitter);
+      p.vy = ampPct * SPRAY_HEIGHT;
+    }
+
+    prev() { this._init((this.mode - 1 + 8) % 8); }
+    next() { this._init((this.mode + 1) % 8); }
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Color tables  (mirrors MakeColorTableFromPNG + ColorTableComponentValue)
+  //
+  //  The original PNGs are 2-D: Y axis = frequency (0 = low, 1 = high),
+  //  X axis cycles over time at currTableSpeed columns/sec.
+  //  Fallback gradients are used when the PNGs can't be loaded (e.g. file://).
+  // ---------------------------------------------------------------------------
+  class ColorTables {
+    constructor() {
+      this.tables  = [];   // { name, pixels: Uint8ClampedArray, width, height }
+      this.current = 0;
+      this.column  = 0;    // fractional column index, cycles over time
+    }
+
+    async load(basePath) {
+      const names = ['Fire', 'Random', 'RedWhiteBlue', 'Sea', 'Snow', 'Standard'];
+      await Promise.all(names.map(n => this._loadPng(basePath + n + '.png', n)));
+      if (this.tables.length === 0) this._makeFallbacks();
+    }
+
+    _loadPng(url, name) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const cv  = document.createElement('canvas');
+          cv.width  = img.width;
+          cv.height = img.height;
+          cv.getContext('2d').drawImage(img, 0, 0);
+          const px = cv.getContext('2d').getImageData(0, 0, img.width, img.height).data;
+          this.tables.push({ name, pixels: px, width: img.width, height: img.height });
+          resolve();
+        };
+        img.onerror = () => resolve(); // silently skip missing files
+        img.src = url;
+      });
+    }
+
+    /** Hand-crafted fallback gradients that approximate the original schemes. */
+    _makeFallbacks() {
+      const W = 256, H = 64;
+      const schemes = {
+        Fire:        (f, _x) => {
+          const t = f;
+          return [
+            Math.min(1, t < 0.5 ? t * 2 : 1),
+            Math.min(1, t < 0.5 ? 0 : (t - 0.5) * 2),
+            0
+          ];
+        },
+        Standard:    (f, _x) => {
+          // hue sweep: low freq = red, high = violet
+          const hue = (1 - f) * 270;
+          return this._hsvToRgb(hue, 1, 1);
+        },
+        Sea:         (f, _x) => {
+          const hue = 180 + f * 60;
+          return this._hsvToRgb(hue, 0.8, 0.9);
+        },
+        Snow:        (f, _x) => {
+          const v = 0.5 + f * 0.5;
+          return this._hsvToRgb(200 + f * 40, 0.3 * (1 - f), v);
+        },
+        RedWhiteBlue:(f, _x) => {
+          if (f < 0.5) {
+            const t = f * 2;
+            return [1, t, t]; // red → white
+          } else {
+            const t = (f - 0.5) * 2;
+            return [1 - t, 1 - t, 1]; // white → blue
+          }
+        },
+        Random:      (f, x) => {
+          const hue = ((f * 137.5 + x * 0.5) % 360 + 360) % 360;
+          return this._hsvToRgb(hue, 1, 1);
+        },
+      };
+
+      for (const [name, fn] of Object.entries(schemes)) {
+        const pixels = new Uint8ClampedArray(W * H * 4);
+        for (let row = 0; row < H; row++) {
+          const f = row / (H - 1); // frequency percent (row 0 = low freq)
+          for (let col = 0; col < W; col++) {
+            const [r, g, b] = fn(f, col / W);
+            const idx = (row * W + col) * 4;
+            pixels[idx]     = Math.round(r * 255);
+            pixels[idx + 1] = Math.round(g * 255);
+            pixels[idx + 2] = Math.round(b * 255);
+            pixels[idx + 3] = 255;
+          }
+        }
+        this.tables.push({ name, pixels, width: W, height: H });
+      }
+    }
+
+    _hsvToRgb(h, s, v) {
+      const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+      let r = 0, g = 0, b = 0;
+      if      (h < 60)  { r = c; g = x; }
+      else if (h < 120) { r = x; g = c; }
+      else if (h < 180) { g = c; b = x; }
+      else if (h < 240) { g = x; b = c; }
+      else if (h < 300) { r = x; b = c; }
+      else              { r = c; b = x; }
+      return [r + m, g + m, b + m];
+    }
+
+    /**
+     * Sample the current table at (freqPct, this.column).
+     * Y axis = frequency, X axis = animated column.
+     */
+    getColor(freqPct) {
+      const t = this.tables[this.current];
+      if (!t) return [1, 1, 1];
+      const col = Math.min(t.width  - 1, Math.floor(this.column) % t.width);
+      const row = Math.min(t.height - 1, Math.floor(freqPct * (t.height - 1)));
+      const idx = (row * t.width + col) * 4;
+      return [t.pixels[idx] / 255, t.pixels[idx + 1] / 255, t.pixels[idx + 2] / 255];
+    }
+
+    step(dt) {
+      const t = this.tables[this.current];
+      if (!t) return;
+      this.column = (this.column + dt * COLOR_TABLE_SPEED) % t.width;
+    }
+
+    prev() {
+      this.current = (this.current - 1 + this.tables.length) % this.tables.length;
+      this.column  = rand(0, this.tables[this.current].width);
+    }
+
+    next() {
+      this.current = (this.current + 1) % this.tables.length;
+      this.column  = rand(0, this.tables[this.current].width);
+    }
+
+    name() { return this.tables[this.current]?.name ?? '?'; }
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Particle texture  (procedural soft-glow disc, sharpness-controlled)
+  //  Mirrors the SetParticleSharpness / texture generation in the original.
+  // ---------------------------------------------------------------------------
+  function makeParticleTexture(sharpness) {
+    const S  = 128;
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = S;
+    const ctx = cv.getContext('2d');
+    const cx  = S / 2;
+
+    // Power controls falloff steepness: 1 = linear (fuzzy), 6 = tight (sharp)
+    const power  = 1 + sharpness * 5;
+    const stops  = 16;
+    const grd    = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx);
+
+    for (let i = 0; i <= stops; i++) {
+      const t     = i / stops;
+      const alpha = Math.pow(1 - t, power);
+      grd.addColorStop(t, `rgba(255,255,255,${alpha.toFixed(4)})`);
+    }
+
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, S, S);
+    return new THREE.CanvasTexture(cv);
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Three.js ShaderMaterial — supports per-particle size + additive blending
+  // ---------------------------------------------------------------------------
+  const VERT_SHADER = `
+    attribute float pSize;
+    attribute vec3  pColor;
+    varying   vec3  vColor;
+    void main() {
+      vColor = pColor;
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize  = pSize * (300.0 / -mv.z);
+      gl_Position   = projectionMatrix * mv;
+    }
+  `;
+
+  const FRAG_SHADER = `
+    uniform sampler2D tex;
+    varying vec3 vColor;
+    void main() {
+      vec4 s = texture2D(tex, gl_PointCoord);
+      gl_FragColor = vec4(vColor * s.rgb, s.a);
+    }
+  `;
+
+  // ---------------------------------------------------------------------------
+  //  Main application
+  // ---------------------------------------------------------------------------
+  class FountainMusicApp {
+    constructor() {
+      // --- Three.js scene ---
+      this.scene    = new THREE.Scene();
+      this.camera   = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.01, 100);
+      this.renderer = new THREE.WebGLRenderer({ antialias: false });
+      this.renderer.setPixelRatio(devicePixelRatio);
+      this.renderer.setSize(innerWidth, innerHeight);
+      document.getElementById('canvas-container').appendChild(this.renderer.domElement);
+
+      // Camera at (0, 3, 15) looking at origin replicates the original's
+      // glTranslatef(0, -3, -15) with FOV 45.
+      this.camera.position.set(0, 3, 15);
+      this.camera.lookAt(0, 0, 0);
+
+      // --- Simulation state ---
+      this.pool        = new ParticlePool();
+      this.fountain    = new FountainMode();
+      this.colorTables = new ColorTables();
+      this.shortBuf    = new AudioRingBuffer(SHORT_BUF_SIZE);
+      this.longBuf     = new AudioRingBuffer(LONG_BUF_SIZE);
+
+      // Raw spectrum arrays filled by AnalyserNode each frame
+      this.specData    = [new Uint8Array(NUM_SPECTRUM), new Uint8Array(NUM_SPECTRUM)];
+
+      // Per-bin fractional remainder, matching the original's particleNumRemainder
+      this.binRemainder = new Float32Array(NUM_SPECTRUM);
+
+      // Fountain rotation angle in degrees (matches original angle variable)
+      this.angle       = rand(0, 360);
+
+      // User-adjustable parameters (original defaults from FMDefs.c)
+      this.particleSize = 0.2;
+      this.sharpness    = 0.0;
+      this.gravity      = GRAVITY;
+
+      // Audio
+      this.analyser    = null;
+      this.isRunning   = false;
+
+      // Track info
+      this.trackTitle  = '';
+      this.trackArtist = '';
+
+      // --- Three.js geometry (BufferGeometry, pre-allocated) ---
+      this.positions = new Float32Array(MAX_PARTICLES * 3);
+      this.pColors   = new Float32Array(MAX_PARTICLES * 3);
+      this.pSizes    = new Float32Array(MAX_PARTICLES);
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+      geo.setAttribute('pColor',   new THREE.BufferAttribute(this.pColors,   3));
+      geo.setAttribute('pSize',    new THREE.BufferAttribute(this.pSizes,    1));
+      geo.setDrawRange(0, 0);
+      this.geo = geo;
+
+      this.ptexture = makeParticleTexture(this.sharpness);
+      this.material = new THREE.ShaderMaterial({
+        uniforms:     { tex: { value: this.ptexture } },
+        vertexShader:   VERT_SHADER,
+        fragmentShader: FRAG_SHADER,
+        blending:       THREE.AdditiveBlending,
+        depthWrite:     false,
+        transparent:    true,
+      });
+
+      this.points = new THREE.Points(geo, this.material);
+      this.scene.add(this.points);
+
+      // --- Overlay timers ---
+      this._overlayTimeout = null;
+
+      // --- Wire up UI & keyboard ---
+      this._bindEvents();
+
+      // --- Load color tables, then start loop ---
+      this.colorTables.load('../colorschemes/').then(() => {
+        this._startLoop();
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    //  UI & input
+    // -------------------------------------------------------------------------
+    _bindEvents() {
+      window.addEventListener('resize', () => {
+        this.camera.aspect = innerWidth / innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(innerWidth, innerHeight);
+      });
+
+      document.getElementById('mic-btn')
+        .addEventListener('click', () => this._startMic());
+
+      document.getElementById('file-input')
+        .addEventListener('change', e => {
+          const f = e.target.files[0];
+          if (f) this._startFile(f);
+        });
+
+      document.addEventListener('keydown', e => this._onKey(e));
+    }
+
+    async _startMic() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        const ctx    = new AudioContext();
+        const src    = ctx.createMediaStreamSource(stream);
+        this._connectAnalyser(ctx, src);
+        this._hideStartUI();
+      } catch (err) {
+        this._showError('Microphone unavailable: ' + err.message);
+      }
+    }
+
+    _startFile(file) {
+      const audio    = new Audio();
+      audio.src      = URL.createObjectURL(file);
+      audio.loop     = true;
+      const ctx      = new AudioContext();
+      const src      = ctx.createMediaElementSource(audio);
+      src.connect(ctx.destination);
+      this._connectAnalyser(ctx, src);
+      audio.play();
+
+      this.trackTitle  = file.name.replace(/\.[^.]+$/, '');
+      this.trackArtist = '';
+      this._showOverlay(this.trackTitle, 5000);
+      this._hideStartUI();
+    }
+
+    _connectAnalyser(ctx, source) {
+      const a = ctx.createAnalyser();
+      a.fftSize               = NUM_SPECTRUM * 2;  // → NUM_SPECTRUM bins
+      a.smoothingTimeConstant = 0;                  // no built-in smoothing;
+                                                    // we do our own rolling avg
+      source.connect(a);
+      this.analyser  = a;
+      this.isRunning = true;
+    }
+
+    _hideStartUI() {
+      document.getElementById('ui').style.display    = 'none';
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('hud').style.display   = 'block';
+      document.getElementById('keys').style.display  = 'block';
+    }
+
+    _showOverlay(text, ms) {
+      const el = document.getElementById('overlay');
+      el.textContent = text;
+      clearTimeout(this._overlayTimeout);
+      this._overlayTimeout = setTimeout(() => { el.textContent = ''; }, ms);
+    }
+
+    _showError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+
+    _updateHud() {
+      const hud = document.getElementById('hud');
+      if (!this.isRunning) return;
+      hud.textContent =
+        `${this.pool.active.length} particles\n` +
+        `Pattern: ${MODE_NAMES[this.fountain.mode]}${this.fountain.locked ? ' (locked)' : ''}\n` +
+        `Colors: ${this.colorTables.name()}`;
+    }
+
+    _onKey(e) {
+      if (!this.isRunning) return;
+
+      switch (e.key) {
+        case '[':
+          this.fountain.prev();
+          this._showOverlay('Pattern: ' + MODE_NAMES[this.fountain.mode], 2500);
+          break;
+        case ']':
+          this.fountain.next();
+          this._showOverlay('Pattern: ' + MODE_NAMES[this.fountain.mode], 2500);
+          break;
+        case '\\':
+          this.fountain.locked = !this.fountain.locked;
+          this._showOverlay('Pattern ' + (this.fountain.locked ? 'locked' : 'unlocked'), 2000);
+          break;
+        case ';':
+          this.colorTables.prev();
+          this._showOverlay('Colors: ' + this.colorTables.name(), 2500);
+          break;
+        case "'":
+          this.colorTables.next();
+          this._showOverlay('Colors: ' + this.colorTables.name(), 2500);
+          break;
+        case '-':
+          this.particleSize = Math.max(0.05, this.particleSize - 0.05);
+          break;
+        case '=': case '+':
+          this.particleSize = Math.min(2.0, this.particleSize + 0.05);
+          break;
+        case ',': case '<':
+          this.sharpness = Math.max(0, this.sharpness - 0.25);
+          this._rebuildTexture();
+          this._showOverlay('Edges: ' + this._sharpLabel(), 2000);
+          break;
+        case '.': case '>':
+          this.sharpness = Math.min(1, this.sharpness + 0.25);
+          this._rebuildTexture();
+          this._showOverlay('Edges: ' + this._sharpLabel(), 2000);
+          break;
+        case 'i': case 'I':
+          if (this.trackTitle)
+            this._showOverlay(
+              [this.trackTitle, this.trackArtist].filter(Boolean).join('\n'), 5000);
+          break;
+        case 'h': case 'H': case '?': {
+          const k = document.getElementById('keys');
+          k.style.display = k.style.display === 'none' ? 'block' : 'none';
+          break;
+        }
+      }
+    }
+
+    _sharpLabel() {
+      if (this.sharpness <= 0.125) return 'Very Fuzzy';
+      if (this.sharpness <= 0.375) return 'Fuzzy';
+      if (this.sharpness <= 0.625) return 'Medium';
+      if (this.sharpness <= 0.875) return 'Sharp';
+      return 'Very Sharp';
+    }
+
+    _rebuildTexture() {
+      this.ptexture.dispose();
+      this.ptexture           = makeParticleTexture(this.sharpness);
+      this.material.uniforms.tex.value = this.ptexture;
+    }
+
+    // -------------------------------------------------------------------------
+    //  Main loop
+    // -------------------------------------------------------------------------
+    _startLoop() {
+      let last = null;
+      const loop = ts => {
+        requestAnimationFrame(loop);
+        const dt = last === null ? 0.016 : Math.min((ts - last) / 1000, 0.05);
+        last = ts;
+        this._update(dt);
+        this._render();
+      };
+      requestAnimationFrame(loop);
+    }
+
+    // -------------------------------------------------------------------------
+    //  Update  (audio processing + particle spawning + physics step)
+    //  Mirrors FMProcessRenderData() + FMStepAnimations() in main.c
+    // -------------------------------------------------------------------------
+    _update(dt) {
+      // Rotate fountain (20 deg/sec, matches original `angle -= stepTime*20.0`)
+      this.angle = (this.angle - ROTATION_DEG_S * dt + 360) % 360;
+
+      // Step fountain mode timer
+      this.fountain.step(dt);
+
+      // Step color table column animation
+      this.colorTables.step(dt);
+
+      // Step particle physics (and reap dead ones)
+      this.pool.step(dt);
+
+      if (!this.isRunning || !this.analyser) return;
+
+      // --- Read spectrum from Web Audio ---
+      this.analyser.getByteFrequencyData(this.specData[0]);
+      // Single analyser: mirror to channel 1 (handles mono sources gracefully)
+      this.specData[1].set(this.specData[0]);
+
+      // Insert into rolling buffers
+      this.shortBuf.insert(this.specData);
+      this.longBuf.insert(this.specData);
+      this.shortBuf.computeAverage();
+      this.longBuf.computeAverage();
+
+      const shortAvg = this.shortBuf.average;
+      const longAvg  = this.longBuf.average;
+
+      // --- Spawn particles per frequency bin ---
+      // Faithfully replicates FMProcessRenderData()'s inner loop:
+      //   for each bin: if (relativePercent > 0.007) accumulate 1.0 + remainder
+      for (let i = 0; i < NUM_SPECTRUM; i++) {
+        const chan     = Math.random() < 0.5 ? 0 : 1;
+        const relative = Math.max(0, shortAvg[chan][i] - longAvg[chan][i]);
+
+        const numF = (relative > PARTICLE_THRESHOLD ? 1.0 : 0.0) + this.binRemainder[i];
+        this.binRemainder[i] = numF - Math.floor(numF);
+        const numI = Math.floor(numF);
+
+        for (let j = 0; j < numI; j++) {
+          const p = this.pool.get();
+          if (!p) break;
+
+          p.timeToDie = 10.0;   // safety fallback lifetime
+          this.fountain.setupParticle(p, i / 255.0, relative, chan);
+          p.ay = this.gravity;
+
+          // Color = table color × amplitude × 3.0  (matches original)
+          const [r, g, b] = this.colorTables.getColor(i / 255.0);
+          const boost = relative * 3.0;
+          p.r = r * boost;
+          p.g = g * boost;
+          p.b = b * boost;
+        }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    //  Render  (copy active particles into BufferGeometry, then draw)
+    //  Mirrors RenderScene() in Drawing.c.
+    //
+    //  The original applied glRotatef(angle, 0,1,0) to the whole scene, so all
+    //  particles rotate together. We replicate that by rotating the Points mesh.
+    // -------------------------------------------------------------------------
+    _render() {
+      const active = this.pool.active;
+      const count  = active.length;
+
+      for (let i = 0; i < count; i++) {
+        const p = active[i];
+        this.positions[i * 3]     = p.px;
+        this.positions[i * 3 + 1] = p.py;
+        this.positions[i * 3 + 2] = p.pz;
+
+        const [r, g, b] = p.getColor();
+        this.pColors[i * 3]     = r;
+        this.pColors[i * 3 + 1] = g;
+        this.pColors[i * 3 + 2] = b;
+
+        this.pSizes[i] = this.particleSize * p.size;
+      }
+
+      this.geo.setDrawRange(0, count);
+      this.geo.attributes.position.needsUpdate = true;
+      this.geo.attributes.pColor.needsUpdate   = true;
+      this.geo.attributes.pSize.needsUpdate    = true;
+
+      // Rotate entire fountain around Y, matching original glRotatef(angle, 0,1,0)
+      this.points.rotation.y = THREE.MathUtils.degToRad(this.angle);
+
+      this._updateHud();
+      this.renderer.render(this.scene, this.camera);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Boot
+  // ---------------------------------------------------------------------------
+  document.addEventListener('DOMContentLoaded', () => new FountainMusicApp());
+  </script>
+</body>
+</html>
