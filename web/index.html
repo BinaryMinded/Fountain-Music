@@ -681,6 +681,7 @@
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         const ctx    = new AudioContext();
+        await ctx.resume();
         const src    = ctx.createMediaStreamSource(stream);
         this._connectAnalyser(ctx, src);
         this._hideStartUI();
@@ -697,7 +698,8 @@
       const src      = ctx.createMediaElementSource(audio);
       src.connect(ctx.destination);
       this._connectAnalyser(ctx, src);
-      audio.play();
+      ctx.resume().then(() => audio.play())
+        .catch(err => this._showError('Playback failed: ' + err.message));
 
       this.trackTitle  = file.name.replace(/\.[^.]+$/, '');
       this.trackArtist = '';
