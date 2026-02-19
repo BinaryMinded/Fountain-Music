@@ -41,9 +41,35 @@
       pointer-events: none; text-align: right; display: none;
     }
     #error {
-      position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
       color: rgba(255,100,100,0.9); font-size: 12px; display: none;
     }
+    #mobile-controls {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: none;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 8px 10px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px;
+    }
+    .m-group { display: flex; align-items: center; gap: 3px; }
+    .m-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 5px; color: #fff;
+      padding: 7px 11px; font-size: 15px; cursor: pointer;
+      min-width: 36px; text-align: center; line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .m-btn:active { background: rgba(255,255,255,0.22); }
+    .m-label {
+      color: rgba(255,255,255,0.75); font-size: 11px;
+      white-space: nowrap; min-width: 54px; text-align: center;
+    }
+    .m-sep { color: rgba(255,255,255,0.15); font-size: 18px; }
   </style>
 </head>
 <body>
@@ -71,6 +97,36 @@
     h  toggle this help
   </div>
   <div id="error"></div>
+
+  <div id="mobile-controls">
+    <div class="m-group">
+      <button class="m-btn" id="m-pat-prev">❮</button>
+      <span class="m-label" id="m-pat-name">—</span>
+      <button class="m-btn" id="m-pat-next">❯</button>
+    </div>
+    <span class="m-sep">|</span>
+    <button class="m-btn" id="m-pat-lock" title="Lock pattern">🔓</button>
+    <span class="m-sep">|</span>
+    <div class="m-group">
+      <button class="m-btn" id="m-col-prev">❮</button>
+      <span class="m-label" id="m-col-name">—</span>
+      <button class="m-btn" id="m-col-next">❯</button>
+    </div>
+    <span class="m-sep">|</span>
+    <div class="m-group">
+      <button class="m-btn" id="m-size-dn">−</button>
+      <span class="m-label">Size</span>
+      <button class="m-btn" id="m-size-up">+</button>
+    </div>
+    <span class="m-sep">|</span>
+    <div class="m-group">
+      <button class="m-btn" id="m-blur-dn">−</button>
+      <span class="m-label">Blur</span>
+      <button class="m-btn" id="m-blur-up">+</button>
+    </div>
+    <span class="m-sep">|</span>
+    <button class="m-btn" id="m-info" title="Track info">ℹ</button>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
@@ -675,6 +731,19 @@
         });
 
       document.addEventListener('keydown', e => this._onKey(e));
+
+      // Mobile control bar
+      const mb = (id, fn) => document.getElementById(id)?.addEventListener('click', fn);
+      mb('m-pat-prev', () => { this.fountain.prev(); this._updateMobileControls(); this._showOverlay('Pattern: ' + MODE_NAMES[this.fountain.mode], 2000); });
+      mb('m-pat-next', () => { this.fountain.next(); this._updateMobileControls(); this._showOverlay('Pattern: ' + MODE_NAMES[this.fountain.mode], 2000); });
+      mb('m-pat-lock', () => { this.fountain.locked = !this.fountain.locked; this._updateMobileControls(); this._showOverlay('Pattern ' + (this.fountain.locked ? 'locked' : 'unlocked'), 2000); });
+      mb('m-col-prev', () => { this.colorTables.prev(); this._updateMobileControls(); this._showOverlay('Colors: ' + this.colorTables.name(), 2000); });
+      mb('m-col-next', () => { this.colorTables.next(); this._updateMobileControls(); this._showOverlay('Colors: ' + this.colorTables.name(), 2000); });
+      mb('m-size-dn',  () => { this.particleSize = Math.max(0.05, this.particleSize - 0.05); });
+      mb('m-size-up',  () => { this.particleSize = Math.min(2.0,  this.particleSize + 0.05); });
+      mb('m-blur-dn',  () => { this.sharpness = Math.max(0, this.sharpness - 0.25); this._rebuildTexture(); this._showOverlay('Edges: ' + this._sharpLabel(), 2000); });
+      mb('m-blur-up',  () => { this.sharpness = Math.min(1, this.sharpness + 0.25); this._rebuildTexture(); this._showOverlay('Edges: ' + this._sharpLabel(), 2000); });
+      mb('m-info',     () => { if (this.trackTitle) this._showOverlay([this.trackTitle, this.trackArtist].filter(Boolean).join('\n'), 5000); });
     }
 
     async _startMic() {
@@ -718,10 +787,25 @@
     }
 
     _hideStartUI() {
-      document.getElementById('ui').style.display    = 'none';
+      document.getElementById('ui').style.display      = 'none';
       document.getElementById('overlay').style.display = 'block';
-      document.getElementById('hud').style.display   = 'block';
-      document.getElementById('keys').style.display  = 'block';
+      document.getElementById('hud').style.display     = 'block';
+      // Show keyboard hints only on non-touch devices
+      if (!navigator.maxTouchPoints) {
+        document.getElementById('keys').style.display  = 'block';
+      }
+      const mc = document.getElementById('mobile-controls');
+      mc.style.display = 'flex';
+      this._updateMobileControls();
+    }
+
+    _updateMobileControls() {
+      const patName = document.getElementById('m-pat-name');
+      const colName = document.getElementById('m-col-name');
+      const lockBtn = document.getElementById('m-pat-lock');
+      if (patName) patName.textContent = MODE_NAMES[this.fountain.mode];
+      if (colName) colName.textContent = this.colorTables.name();
+      if (lockBtn) lockBtn.textContent = this.fountain.locked ? '🔒' : '🔓';
     }
 
     _showOverlay(text, ms) {
