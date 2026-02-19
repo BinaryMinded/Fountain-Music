@@ -7,10 +7,10 @@ on:
       - master
       - "claude/**"
 
+# Only needs write access to push the gh-pages branch — no environment
+# protection rules involved, so this works from any source branch.
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
@@ -18,28 +18,22 @@ concurrency:
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Build site
         run: |
-          # Preserve the web/ + colorschemes/ structure so the
-          # relative path ../colorschemes/ in index.html still works.
-          # A redirect at the root sends visitors straight to /web/.
+          # Preserve the web/ + colorschemes/ relative path structure.
+          # Root index.html redirects visitors straight to /web/.
           mkdir -p _site/web _site/colorschemes
           cp web/index.html _site/web/index.html
           cp colorschemes/*.png _site/colorschemes/
           printf '<meta http-equiv="refresh" content="0;url=web/">' > _site/index.html
 
-      - uses: actions/configure-pages@v4
-
-      - uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          path: _site
-
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          force_orphan: true
