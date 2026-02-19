@@ -65,6 +65,7 @@
       touch-action: manipulation;
     }
     .m-btn:active { background: rgba(255,255,255,0.22); }
+    .m-btn.m-active { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.7); }
     .m-label {
       color: rgba(255,255,255,0.75); font-size: 11px;
       white-space: nowrap; min-width: 54px; text-align: center;
@@ -114,6 +115,7 @@
     ; '  prev / next color<br>
     - +  particle size<br>
     &lt; &gt;  fuzzier / crisper<br>
+    b  bloom on / off<br>
     i  track info<br>
     h  toggle this help
   </div>
@@ -146,6 +148,8 @@
       <button class="m-btn" id="m-blur-up">+</button>
     </div>
     <span class="m-sep">|</span>
+    <button class="m-btn" id="m-bloom" title="Toggle bloom glow">Bloom</button>
+    <span class="m-sep">|</span>
     <button class="m-btn" id="m-info" title="Track info">ℹ</button>
     <div id="m-transport">
       <button class="m-btn" id="m-playpause">⏸</button>
@@ -155,6 +159,12 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
   <script>
   // =============================================================================
   //  Fountain Music — Web Port
@@ -727,6 +737,10 @@
       this.points = new THREE.Points(geo, this.material);
       this.scene.add(this.points);
 
+      // --- Bloom post-processing (lazy-init on first enable) ---
+      this.bloomEnabled = false;
+      this.composer     = null;   // THREE.EffectComposer, created on demand
+
       // --- Overlay timers ---
       this._overlayTimeout = null;
 
@@ -747,6 +761,7 @@
         this.camera.aspect = innerWidth / innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(innerWidth, innerHeight);
+        if (this.composer) this.composer.setSize(innerWidth, innerHeight);
       });
 
       document.getElementById('mic-btn')
@@ -771,6 +786,7 @@
       mb('m-size-up',  () => { this.particleSize = Math.min(2.0,  this.particleSize + 0.05); });
       mb('m-blur-dn',  () => { this.sharpness = Math.max(0, this.sharpness - 0.25); this._rebuildTexture(); this._showOverlay('Edges: ' + this._sharpLabel(), 2000); });
       mb('m-blur-up',  () => { this.sharpness = Math.min(1, this.sharpness + 0.25); this._rebuildTexture(); this._showOverlay('Edges: ' + this._sharpLabel(), 2000); });
+      mb('m-bloom',    () => this._toggleBloom());
       mb('m-info',     () => { if (this.trackTitle) this._showOverlay([this.trackTitle, this.trackArtist].filter(Boolean).join('\n'), 5000); });
 
       // Transport controls (file mode only)
@@ -957,6 +973,9 @@
             this._showOverlay(
               [this.trackTitle, this.trackArtist].filter(Boolean).join('\n'), 5000);
           break;
+        case 'b': case 'B':
+          this._toggleBloom();
+          break;
         case 'h': case 'H': case '?': {
           const k = document.getElementById('keys');
           k.style.display = k.style.display === 'none' ? 'block' : 'none';
@@ -977,6 +996,29 @@
       this.ptexture.dispose();
       this.ptexture           = makeParticleTexture(this.sharpness);
       this.material.uniforms.tex.value = this.ptexture;
+    }
+
+    // -------------------------------------------------------------------------
+    //  Bloom post-processing
+    // -------------------------------------------------------------------------
+    _initBloom() {
+      this.composer = new THREE.EffectComposer(this.renderer);
+      this.composer.addPass(new THREE.RenderPass(this.scene, this.camera));
+      const bloom = new THREE.UnrealBloomPass(
+        new THREE.Vector2(innerWidth, innerHeight),
+        1.2,   // strength
+        0.5,   // radius
+        0.0    // threshold — bloom everything above black
+      );
+      this.composer.addPass(bloom);
+    }
+
+    _toggleBloom() {
+      this.bloomEnabled = !this.bloomEnabled;
+      if (this.bloomEnabled && !this.composer) this._initBloom();
+      const btn = document.getElementById('m-bloom');
+      if (btn) btn.classList.toggle('m-active', this.bloomEnabled);
+      this._showOverlay('Bloom ' + (this.bloomEnabled ? 'on' : 'off'), 1500);
     }
 
     // -------------------------------------------------------------------------
@@ -1090,7 +1132,8 @@
       this.points.rotation.y = THREE.MathUtils.degToRad(this.angle);
 
       this._updateHud();
-      this.renderer.render(this.scene, this.camera);
+      if (this.bloomEnabled && this.composer) this.composer.render();
+      else this.renderer.render(this.scene, this.camera);
     }
   }
 
